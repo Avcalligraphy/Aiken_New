@@ -10,7 +10,7 @@ const BoxHistory = ({active = true}) => {
       >
           <div className="flex flex-row gap-[6px] items-center ">
             <img
-              src="/images/profile.png"
+              src="/images/profile.jpg"
               className=" w-[29px] h-[29px] bg-cover rounded-full "
             />
             <div className="flex flex-col">

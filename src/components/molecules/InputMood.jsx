@@ -1,8 +1,8 @@
 import React from 'react'
 
-const InputMood = ({title, icon, active = true}) => {
+const InputMood = ({title, icon, active = true , onClick}) => {
   return (
-    <div
+    <div onClick={onClick}
       className={`px-[4px] py-[4px] rounded-[18.5px] ${
         active
           ? "bg-transparent border-dashed border-black border-[1px]"

@@ -1,9 +1,10 @@
 import React from 'react'
 import Input from '../molecules/Input';
+import { NavLink } from 'react-router-dom';
 
-const PaymentRules = () => {
+const PaymentRules = ({doctor}) => {
   return (
-    <div className="min-h-screen flex items-center justify-center ">
+    <div className=" mt-[20px] flex items-center justify-center ">
       <div className=" rounded-lg  max-w-md w-full">
         <h1 className="text-red-500 font-bold  mb-4">
           Harap baca dan cermati panduan pembayaran dibawah ini dengan
@@ -55,9 +56,11 @@ const PaymentRules = () => {
         </div>
 
         {/* Payment Button */}
-        <button className="w-full bg-[#240F41] text-white py-3 rounded-md mt-4 hover:bg-purple-600 transition duration-300 shadow-md shadow-[#7A54B7] ">
-          Payment
-        </button>
+        <NavLink to="/payment-card" state={{ doctor: doctor }}>
+          <button className="w-full bg-[#240F41] text-white py-3 rounded-md mt-4 hover:bg-purple-600 transition duration-300 shadow-md shadow-[#7A54B7] ">
+            Payment
+          </button>
+        </NavLink>
       </div>
     </div>
   );

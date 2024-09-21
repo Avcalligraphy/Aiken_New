@@ -3,8 +3,11 @@ import Layout from '../../Layouts'
 import PsikiaterCard from '../../components/molecules/PsikiaterCard';
 import { NavLink } from 'react-router-dom';
 import PsikiaterProfile from '../PsikiaterProfile';
+import { useFetchDataDoctor, useStoreDoctor } from '../../lib/store';
 
 const Psikiater = () => {
+  const { dataDoctor } = useStoreDoctor();
+  useFetchDataDoctor(); // Call the custom hook to fetch data
   return (
     <Layout>
       <div
@@ -33,12 +36,31 @@ const Psikiater = () => {
           </NavLink>
         </div>
         <div className="flex flex-col gap-[20px]">
-          <NavLink to="/psikiater-profile">
+          {/* <NavLink to="/psikiater-profile">
             <PsikiaterCard />
-          </NavLink>
-          <PsikiaterCard />
-          <PsikiaterCard />
-          <PsikiaterCard />
+          </NavLink> */}
+          {dataDoctor && dataDoctor.length > 0 ? (
+            dataDoctor.map((item, index) => (
+              <NavLink
+                key={item.id}
+                to={`/psikiater-profile`}
+                state={{ doctor: item }} // Mengirim data doctor melalui state
+              >
+                <PsikiaterCard
+                  keyId={item.id}
+                  name={item.attributes.name}
+                  stars={item.attributes.star}
+                  degree={item.attributes.degree}
+                  photo={
+                    `https://admin.aikenhealth.id` +
+                    item.attributes.photo.data.attributes.url
+                  }
+                />
+              </NavLink>
+            ))
+          ) : (
+            <p>No entries found for the specified psikater.</p>
+          )}
         </div>
       </div>
     </Layout>

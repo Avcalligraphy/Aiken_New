@@ -1,5 +1,6 @@
 import React from 'react'
 import Button from '../../components/molecules/Button';
+import { NavLink } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
@@ -28,7 +29,9 @@ const LandingPage = () => {
             remaja
           </h1>
 
-          <Button title="Go Now ..."/>
+          <NavLink to="/login">
+            <Button title="Go Now ..." />
+          </NavLink>
         </div>
       </div>
     </div>

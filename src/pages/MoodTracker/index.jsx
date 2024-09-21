@@ -2,8 +2,52 @@ import React from 'react'
 import BoxTracker from '../../components/MoodTrackerComponent/BoxTracker'
 import Layout from '../../Layouts'
 import BoxActivitie from '../../components/MoodTrackerComponent/BoxActivitie';
+import ScatterChart from '../../components/Chart';
+import { useFetchDataActivityMoods, useFetchDataMood, useStoreActivityMoods, useStoreMood } from '../../lib/store';
+import { useAuthUser } from 'react-auth-kit';
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
+import SwiperCore from "swiper";
+import { Navigation, Pagination } from "swiper/modules";
+SwiperCore.use([Navigation, Pagination]);
 
 const MoodTracker = () => {
+  const { dataMood } = useStoreMood();
+  const { dataActivityMoods } = useStoreActivityMoods();
+  useFetchDataActivityMoods()
+  const auth = useAuthUser();
+  useFetchDataMood();
+  const filteredData = dataMood.filter(
+    (item) =>
+      item.attributes.users_permissions_user.data.attributes.username ===
+      auth()?.username
+  );
+
+  const today = new Date();
+
+  // Filter moods where publishedAt is today's date
+  const filteredDataMood = dataMood?.filter((item) => {
+    const publishedDate = new Date(item.attributes.publishedAt);
+
+    // Compare only the date part (ignoring time) for both today and publishedDate
+    return (
+      item.attributes.users_permissions_user.data.attributes.username ===
+        auth()?.username &&
+      publishedDate.toLocaleDateString() === today.toLocaleDateString()
+    );
+  });
+  const allMood =
+    dataActivityMoods &&
+    dataActivityMoods
+      .filter(
+        (item) => item.attributes.mood === filteredDataMood[0].attributes.title
+      )
+      .map((item) => ({
+        title: item.attributes.title,
+        image: item.attributes.image.data.attributes.url,
+      }));
+
+
   return (
     <Layout>
       <div
@@ -13,21 +57,33 @@ const MoodTracker = () => {
         }}
         className="min-h-screen px-[15px] pb-[200px]  "
       >
-        <img src="/images/moodTracker.png" />
-        <img
-          alt="text-mood"
-          src="/ornaments/textMoodIcon.png"
-          className="mt-[35px]"
-        />
+        {/* <img src="/images/moodTracker.png" /> */}
+        <div className="mb-[30px]">
+          <h1 className="font-semibold text-[18px]">Mood Tracker</h1>
+          <ScatterChart filteredData={filteredData} />
+        </div>
+        <img alt="text-mood" src="/ornaments/textMoodIcon.png" className="" />
         <h1 className=" mt-[-22px] font-bold text-[18px] ">
-          Activities designed for you
+          Activities designed for you{" "}
+          <span className="text-purple-600">
+            {filteredDataMood && filteredDataMood[0].attributes.title}
+          </span>
         </h1>
         <p className="font-medium text-[#949494] text-[13px] ">
           Personalised for your self
         </p>
-        <div className="flex flex-row gap-[20px] mt-[10px] ">
-          <BoxActivitie />
-          <BoxActivitie />
+        <div className="flex mt-5 ">
+          <Swiper spaceBetween={100} slidesPerView={2} pagination={false}>
+            {allMood ? allMood.map((item, index) => (
+                <SwiperSlide key={index}>
+                  <BoxActivitie
+                    title={item.title}
+                    image={`https://admin.aikenhealth.id${item.image}`}
+                  />
+                </SwiperSlide>
+              )) : <p className='text-black font-semibold'>Data not found</p>}
+          </Swiper>
+          {/* <BoxActivitie /> */}
         </div>
       </div>
     </Layout>

@@ -1,8 +1,9 @@
 import React from 'react'
 
-const Button = ({ title, width = "w-[157px]" }) => {
+const Button = ({ title, width = "w-[157px]" , onClick }) => {
   return (
     <button
+    onClick={onClick}
       className={`py-[11px] ${width} rounded-[18px] bg-gradient-to-r from-[#DEA841]  to-[#A34D39] shadow-md shadow-[#DEA841] text-white font-semibold text-[16px] `}
     >
       {title}

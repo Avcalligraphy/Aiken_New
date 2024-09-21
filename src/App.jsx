@@ -18,34 +18,218 @@ import PaymentPage from './pages/PaymentPage'
 import ChatDoctor from './pages/ChatDoctor'
 import PsikologHistory from './pages/PsikologHistory'
 import ConsultationDetail from './pages/ConsultationDetail'
+import { AuthProvider, RequireAuth } from 'react-auth-kit'
+import RedirectIfAuthenticated from './RedirectIfAuthenticated'
+import Register from './pages/Register/Register'
+import ARScan from './pages/ARScan'
+import PaymentCardPage from './pages/PaymentPage/PaymentCard'
+import RulesPage from './pages/PaymentPage/Rules'
+import PasienDiary from './pages/DearDiary/PasienDiary'
+import MoodPasien from './components/Doctor/MoodPasien'
+// import PaymentRulesPage from './pages/PaymentPage/PaymentRules'
+
 function App() {
   return (
-    <BrowserRouter>
-      <>
-        <div className='sm:hidden block'>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/mood-tracker" element={<MoodTracker />} />
-            <Route path="/mood-assesment" element={<MoodAssesment />} />
-            <Route path="/reading-corner" element={<ReadingPage />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/dear-diary" element={<DearDiary />} />
-            <Route path="/add-diary" element={<AddDiary />} />
-            <Route path="/public-diary" element={<PublicDiary />} />
-            <Route path="/psikiater" element={<Psikiater />} />
-            <Route path="/psikolog-history" element={<PsikologHistory />} />
-            <Route path="/payment" element={<PaymentPage />} />
-            <Route path="/consultation" element={<ConsultationDetail />} />
-            <Route path="/psikiater-profile" element={<PsikiaterProfile />} />
-            <Route path="/chat-ai" element={<ChatAI active={true} />} />
-            <Route path="/chat-doctor" element={<ChatDoctor />} />
-          </Routes>
-        </div>
-        <div className='sm:block hidden'></div>
-      </>
-    </BrowserRouter>
+    <AuthProvider
+      authType={"localstorage"}
+      authName={"_auth"}
+      cookieDomain={window.location.hostname}
+      cookieSecure={false}
+    >
+      <BrowserRouter>
+        <>
+          <div className="sm:hidden block">
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  <RedirectIfAuthenticated>
+                    <Login />
+                  </RedirectIfAuthenticated>
+                }
+              />
+              <Route
+                path="/landing"
+                element={
+                  <RedirectIfAuthenticated>
+                    <LandingPage />
+                  </RedirectIfAuthenticated>
+                }
+              />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <Home />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <RedirectIfAuthenticated>
+                    <Register />
+                  </RedirectIfAuthenticated>
+                }
+              />
+              <Route
+                path="/mood-tracker"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <MoodTracker />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/mood-assesment"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <MoodAssesment />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/reading-corner"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ReadingPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <Profile />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dear-diary"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <DearDiary />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/add-diary"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <AddDiary />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/public-diary"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PublicDiary />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/pasien-diary"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PasienDiary />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/mood-pasien"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <MoodPasien />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/psikiater"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <Psikiater />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/psikolog-history"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PsikologHistory />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/payment"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PaymentPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/payment-rules"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <RulesPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/payment-card"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PaymentCardPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/consultation"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ConsultationDetail />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/psikiater-profile"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <PsikiaterProfile />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/chat-ai"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ChatAI active={true} />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/ar-scan"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ARScan />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/chat-doctor"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ChatDoctor />
+                  </RequireAuth>
+                }
+              />
+            </Routes>
+          </div>
+          <div className="sm:block hidden"></div>
+        </>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

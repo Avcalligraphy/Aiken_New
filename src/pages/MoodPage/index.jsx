@@ -1,63 +1,337 @@
-import React from 'react'
-import Layout from '../../Layouts'
-import InputMood from '../../components/molecules/InputMood';
-import FormAsses from '../../components/MoodAssesmentComponent/FormAsses';
-import Input from '../../components/molecules/Input';
-import Button from '../../components/molecules/Button';
+import React, { useRef, useState } from "react";
+import Layout from "../../Layouts";
+import InputMood from "../../components/molecules/InputMood";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
+import SwiperCore from "swiper";
+import MoodList from "../../lib/MoodList";
+import { Navigation, Pagination } from "swiper/modules";
+import FormAsses from "../../components/MoodAssesmentComponent/FormAsses";
+import Input from "../../components/molecules/Input";
+import Button from "../../components/molecules/Button";
+import { useFetchDataQuestion, useStoreQuestion } from "../../lib/store";
+import { useAuthHeader, useAuthUser } from "react-auth-kit";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+SwiperCore.use([Navigation, Pagination]);
 
 const MoodAssesment = () => {
+  const location = useLocation();
+  const { data } = location.state || {};
+  console.log(data);
+  const [selectedMood, setSelectedMood] = useState("angry");
+  const [activeBranches, setActiveBranches] = useState({});
+  const [range, setRange] = useState("50");
+  const [loading, setLoading] = useState(false); // default value for the range input
+  const [note, setNote] = useState("");
+  const [formAnswers, setFormAnswers] = useState({});
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState(null); // To store recorded audio blob
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(""); // To play back the recorded audio
+  const [photo, setPhoto] = useState(null);
+  const { dataQuestion } = useStoreQuestion();
+  const navigate = useNavigate();
+  useFetchDataQuestion();
+  const auth = useAuthUser();
+  const authHeader = useAuthHeader();
+
+  const handleSlideChange = (swiper) => {
+    const activeMood = MoodList[swiper.activeIndex].name;
+    setSelectedMood(activeMood);
+  };
+
+  const toggleBranchActive = (branch) => {
+    setActiveBranches((prevState) => ({
+      ...prevState,
+      [branch]: !prevState[branch],
+    }));
+  };
+
+  const handleInputChange = (key, value) => {
+    setFormAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [key]: value,
+    }));
+  };
+  const chunks = useRef([]);
+
+  const startRecording = async () => {
+    try {
+      // Meminta izin untuk menggunakan mikrofon
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Inisialisasi MediaRecorder
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      recorder.start();
+      setIsRecording(true);
+
+      recorder.ondataavailable = (e) => {
+        chunks.current.push(e.data); // Simpan data yang direkam dalam bentuk chunks
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks.current, { type: "audio/wav" }); // Konversi chunks ke Blob
+        setRecordedAudio(blob);
+        const audioURL = window.URL.createObjectURL(blob);
+        setAudioUrl(audioURL); // Untuk playback
+        chunks.current = []; // Reset chunks setelah selesai
+      };
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorder.stop(); // Hentikan perekaman
+    setIsRecording(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+
+      // Menambahkan file suara dan foto ke dalam FormData
+      if (recordedAudio) {
+        formData.append("files", recordedAudio, "recorded-audio.wav");
+      }
+      if (photo) {
+        formData.append("files", photo);
+      }
+
+      // Melakukan upload file ke API Strapi
+      const uploadResponse = await axios.post(
+        "https://admin.aikenhealth.id/api/upload",
+        formData,
+        {
+          headers: {
+            Authorization: authHeader(), // Pastikan format Bearer
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const fileIds = uploadResponse.data.map((file) => file.id); // Mendapatkan ID file yang diupload
+
+      // Data untuk mood yang akan dikirim
+      const moodData = {
+        data: {
+          title: selectedMood,
+          branchFeeling: JSON.stringify(activeBranches),
+          range: range,
+          users_permissions_user: auth()?.id, // User ID dari auth kit
+          note: note,
+          question: JSON.stringify(formAnswers),
+          voice: fileIds.length > 0 ? fileIds[0] : null, // Menggunakan file pertama untuk suara
+          photo: fileIds.length > 1 ? fileIds[1] : null, // Menggunakan file kedua untuk foto
+        },
+      };
+
+      // Mengirim data mood ke API
+      const response = await axios.post(
+        "https://admin.aikenhealth.id/api/moods",
+        moodData,
+        {
+          headers: {
+            Authorization: authHeader(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        navigate("/"); // Pindah halaman setelah sukses
+      } else {
+        console.error("Error submitting data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectedMoodObject = MoodList.find(
+    (item) => item.name === selectedMood
+  );
+
+  const questionMood = dataQuestion.filter(
+    (item) => item.attributes.mood === selectedMood
+  );
   return (
     <Layout>
       <div
         className="min-h-screen"
-        style={{
-          backgroundImage: "url(/ornaments/ornaments.png)",
-          // backgroundSize: "cover",
-        }}
+        style={{ backgroundImage: "url(/ornaments/ornaments.png)" }}
       >
-        <img className="" src="/images/emotion.png" />
-        <div className="flex justify-center">
-          <h1 className="text-[32px] font-bold leading-[28px] text-center max-w-[259px]  ">
-            What do you feel today ?
+        <Swiper
+          spaceBetween={50}
+          slidesPerView={1}
+          onSlideChange={handleSlideChange}
+          pagination={false}
+        >
+          {MoodList.map((item) => (
+            <SwiperSlide key={item.name}>
+              <div className="flex flex-col items-center">
+                <img
+                  src={`/icons/${item.name}.png`}
+                  alt={item.name}
+                  className="w-[180px] h-auto "
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        <div className="flex justify-center mt-[10px] ">
+          <h1 className="text-[32px] font-bold leading-[28px] text-center max-w-[259px]">
+            What do you feel today {selectedMood || "None"}?
           </h1>
         </div>
-        <div className="grid grid-cols-3 gap-[20px] mt-[22px] px-[15px]  ">
-          <InputMood title="Fatigue" active />
-          <InputMood title="Pain" active={false} />
-          <InputMood title="Apathy" active={false} />
-          <InputMood title="Anxiety" active={false} />
-          <InputMood title="Sadness" active />
-          <InputMood title="Ennui" active={false} />
+
+        <div className="grid grid-cols-2 gap-[20px] mt-[22px] px-[15px]  ">
+          {selectedMoodObject &&
+            selectedMoodObject.branch.map((branch) => (
+              <InputMood
+                key={branch}
+                title={branch}
+                active={!!activeBranches[branch]}
+                onClick={() => toggleBranchActive(branch)}
+              />
+            ))}
         </div>
+
         <div className="mt-[40px] px-[15px] pb-[200px] ">
           <img alt="text-mood" src="/ornaments/textMoodIcon.png" />
-          <h1 className=" mt-[-22px] font-bold text-[18px] ">
-            Asses your self
-          </h1>
-          <p className="font-medium text-[#949494] text-[13px] ">
-            Personalised for your self
+          <h1 className="mt-[-22px] font-bold text-[20px]">Assess yourself</h1>
+          <p className="font-medium text-[#949494] text-[14px]">
+            Personalized for yourself
           </p>
-          <div className=" mt-[18px] gap-[30px] flex flex-col  ">
-            <FormAsses title="Are you able to focus on what you’re doing ?" />
-            <FormAsses
-              active={false}
-              title="Do you feel capable of making decision ?"
-            />
+          <div className="mt-[18px] gap-[30px] flex flex-col">
+            <div className="bg-[#DCEDF9] border-[#9BADBA] rounded-[30px] border-[1px] w-full p-[20px]">
+              <h1 className="font-semibold text-[20px] leading-[20px] mb-[10px]">
+                Seberapa besar persentase perasaan tersebut?
+              </h1>
+              <input
+                id="rangeInput"
+                type="range"
+                min="0"
+                max="100"
+                value={range}
+                onChange={(e) => setRange(e.target.value)}
+                className="w-full h-2 bg-[#ffff] rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 border-[1px] border-gray-300"
+              />
+              <div className="flex justify-between text-[16px] text-black font-semibold mt-1">
+                <span>0</span>
+                <span>{range}</span>
+              </div>
+            </div>
+
+            {[
+              `Apa yang membuatmu merasa ${selectedMood} saat ini?`,
+              `Belakangan ini, seberapa sering kamu merasakan ${selectedMood}?`,
+              `Apa yang biasanya kamu lakukan ketika merasa sangat ${selectedMood}?`,
+              `Apa yang kamu pikirkan saat merasakan emosi ini ${selectedMood}?`,
+              `Apakah ada tindakan tertentu yang membuatmu merasa ${selectedMood}?`,
+            ].map((question, index) => (
+              <FormAsses
+                key={index}
+                title={question}
+                active={index % 2 === 0}
+                onInputChange={(value) => handleInputChange(question, value)}
+                value={formAnswers[question] || ""}
+              />
+            ))}
+
+            {questionMood?.map((item, index) => (
+              <FormAsses
+                key={item.id}
+                title={item.attributes.question}
+                active={index % 2 === 0}
+                onInputChange={(value) =>
+                  handleInputChange(item.attributes.question, value)
+                }
+                value={formAnswers[item.attributes.question] || ""}
+              />
+            ))}
           </div>
+
           <div className="flex flex-col gap-[26px] mt-[24px] ">
             <Input
               title="Catatan Singkat"
               icon="notepad"
               placeholder="Tambahkan Catatan..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             />
-            <Input title="Photo" icon="camera" placeholder="Ambil Photo" />
-            <Input title="Rekam Suara" icon="microphone" placeholder="Sentuh untuk Merekam" />
-            <Button title="Save Data" width="w-[171px]" />
+            <Input
+              title="Photo"
+              icon="camera"
+              type="file"
+              onChange={(e) => setPhoto(e.target.files[0])}
+            />
+            <div className="flex flex-col gap-[10px] ">
+              <div className="flex flex-row gap-[14px] items-center ">
+                <i
+                  className={`bx bxs-microphone text-[20px] text-[#240F41]`}
+                ></i>
+                <h1 className=" text-[#240F41] font-bold text-[16px] ">
+                  Rekam Suara
+                </h1>
+              </div>
+              <div className="bg-gradient-to-b from-[#240F41] to-[#7A54B7] p-[1px] rounded-[24px] w-full h-fit shadow-md shadow-[#7A54B7]">
+                <div className="h-fit bg-white rounded-[24px] px-[23px] py-[14px] flex flex-col items-end ">
+                  {!isRecording && (
+                    <i
+                      onClick={startRecording}
+                      className="bx bxs-microphone text-[20px] text-black "
+                    ></i>
+                  )}
+                  {isRecording && (
+                    <i
+                      onClick={stopRecording}
+                      className="bx bxs-microphone-off text-[20px] text-red-500 "
+                    ></i>
+                  )}
+
+                  {/* Audio controls and delete button */}
+                  {audioUrl && (
+                    <div className="w-full flex flex-col items-end gap-[10px]">
+                      <audio controls>
+                        <source src={audioUrl} type="audio/wav" />
+                        Browser Anda tidak mendukung elemen audio.
+                      </audio>
+                      {/* Delete Button */}
+
+                      <i
+                        onClick={() => {
+                          setAudioUrl("");
+                          setRecordedAudio(null);
+                        }}
+                        className="bx bxs-trash text-[20px] text-red-500 "
+                      ></i>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              title={loading ? "Loading ..." : "Save Data"}
+              width="w-[171px]"
+              onClick={handleSubmit}
+              disabled={loading}
+            />
           </div>
         </div>
       </div>
     </Layout>
   );
-}
+};
 
-export default MoodAssesment
+export default MoodAssesment;

@@ -1,7 +1,8 @@
 import React from 'react'
 import Input from '../molecules/Input';
+import { NavLink } from 'react-router-dom';
 
-const PaymentCard = () => {
+const PaymentCard = ({doctor, price}) => {
   return (
     <div className="flex mt-4 items-center justify-center">
       <div className="rounded-lg  max-w-md w-full">
@@ -22,7 +23,7 @@ const PaymentCard = () => {
         <div className="mb-4">
           <h2 className="font-bold mb-2">Nominal yang harus dibayarkan</h2>
           <p className="text-[#443CC1] text-center text-3xl font-bold">
-            Rp 50.000
+            Rp {price}
           </p>
         </div>
 
@@ -32,9 +33,11 @@ const PaymentCard = () => {
         </p>
 
         {/* Payment Form Button */}
-        <button className="w-full bg-[#240F41] text-white py-3 rounded-md mt-4 hover:bg-purple-600 transition duration-300">
-          Isi Formulir Pembayaran
-        </button>
+        <NavLink to="/payment" state={{ doctor: doctor }}>
+          <button className="w-full bg-[#240F41] text-white py-3 rounded-md mt-4 hover:bg-purple-600 transition duration-300">
+            Isi Formulir Pembayaran
+          </button>
+        </NavLink>
       </div>
     </div>
   );

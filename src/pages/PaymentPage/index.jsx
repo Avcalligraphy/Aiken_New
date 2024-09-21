@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Layout from '../../Layouts'
 import Input from '../../components/molecules/Input';
 import PaymentCard from '../../components/PaymentComponents/PaymentCard';
 import PaymentForm from '../../components/PaymentComponents/PaymentForm';
+import PaymentRules from '../../components/PaymentComponents/PaymentRules';
+import { useLocation } from 'react-router-dom';
+import { useAuthUser } from 'react-auth-kit';
 
 const PaymentPage = () => {
+  const location = useLocation();
+  const { doctor } = location.state || {}; // Ambil data doctor dari state
+  const [page, setPage] = useState(0);
+  const auth = useAuthUser()
   return (
     <Layout>
       <div
@@ -18,7 +25,14 @@ const PaymentPage = () => {
         <h1 className=" mt-[-22px] font-bold text-[20px] ">
           Requirement Payment
         </h1>
-        <PaymentForm />
+        {/* {page === 0 ? (
+          <PaymentRules onClick={() => setPage(page + 1)} />
+        ) : page === 1 ? (
+          <PaymentCard price={doctor?.attributes?.price} onClick={() => setPage(page + 1)} />
+        ) : (
+          <PaymentForm user={auth()} doctor={doctor} />
+        )} */}
+        <PaymentForm user={auth()} doctor={doctor} />
       </div>
     </Layout>
   );
