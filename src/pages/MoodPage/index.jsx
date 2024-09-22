@@ -13,6 +13,7 @@ import { useFetchDataQuestion, useStoreQuestion } from "../../lib/store";
 import { useAuthHeader, useAuthUser } from "react-auth-kit";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 SwiperCore.use([Navigation, Pagination]);
 
@@ -59,6 +60,11 @@ const MoodAssesment = () => {
     if (data?.attributes?.photo?.data?.attributes?.url) {
       setPhotoPreview(
         `https://admin.aikenhealth.id${data.attributes.photo.data.attributes.url}`
+      );
+    }
+    if (data?.attributes?.voice?.data[0]?.attributes?.url) {
+      setAudioUrl(
+        `https://admin.aikenhealth.id${data?.attributes?.voice?.data[0]?.attributes?.url}`
       );
     }
     
@@ -124,17 +130,15 @@ const MoodAssesment = () => {
     e.preventDefault();
     
     if (!photo) {
-      setErrorMessage("Photo is required.");
+      toast.error("Photo is required.");
       return;
     }
 
     if (!recordedAudio) {
-      setErrorMessage("Audio recording is required.");
+      toast.error("Audio recording is required.");
       return;
     }
 
-    // Jika validasi lolos, reset pesan error
-    setErrorMessage("");
     setLoading(true);
 
     try {
@@ -218,6 +222,7 @@ const MoodAssesment = () => {
 
   return (
     <Layout>
+      <Toaster position="top-center" reverseOrder={false} />
       <div
         className="min-h-screen"
         style={{ backgroundImage: "url(/ornaments/ornaments.png)" }}
@@ -325,12 +330,7 @@ const MoodAssesment = () => {
               type="file"
               onChange={handlePhotoChange}
             />
-            {photoPreview && (
-              <img
-                src={photoPreview}
-                alt="Photo Preview"
-              />
-            )}
+            {photoPreview && <img src={photoPreview} alt="Photo Preview" />}
 
             {/* Display previous audio and allow re-recording */}
             <div className="flex flex-col gap-[10px]">
@@ -344,6 +344,7 @@ const MoodAssesment = () => {
               </div>
               <div className="bg-gradient-to-b from-[#240F41] to-[#7A54B7] p-[1px] rounded-[24px] w-full h-fit shadow-md shadow-[#7A54B7]">
                 <div className="h-fit bg-white rounded-[24px] px-[23px] py-[14px] flex flex-col items-end ">
+                  {/* Tampilkan tombol untuk merekam atau menghentikan rekaman */}
                   {!isRecording && (
                     <i
                       onClick={startRecording}
@@ -357,11 +358,30 @@ const MoodAssesment = () => {
                     ></i>
                   )}
 
-                  {/* Audio controls and delete button */}
-                  {audioUrl && (
+                  {/* Tampilkan rekaman lama jika tersedia */}
+                  {audioUrl && !isRecording && (
                     <div className="w-full flex flex-col items-end gap-[10px]">
+                      <h2 className="text-[14px] text-black font-semibold">
+                        Rekaman Lama:
+                      </h2>
                       <audio controls>
                         <source src={audioUrl} type="audio/wav" />
+                        Browser Anda tidak mendukung elemen audio.
+                      </audio>
+                    </div>
+                  )}
+
+                  {/* Tampilkan rekaman baru jika sudah ada */}
+                  {recordedAudio && !isRecording && (
+                    <div className="w-full flex flex-col items-end gap-[10px]">
+                      <h2 className="text-[14px] text-black font-semibold">
+                        Rekaman Baru:
+                      </h2>
+                      <audio controls>
+                        <source
+                          src={URL.createObjectURL(recordedAudio)}
+                          type="audio/wav"
+                        />
                         Browser Anda tidak mendukung elemen audio.
                       </audio>
                       {/* Delete Button */}
