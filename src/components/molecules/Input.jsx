@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Input = ({title, icon, placeholder, value, onChange, type}) => {
+const Input = ({title, icon, placeholder, value, onChange, type, required}) => {
   return (
     <div className="flex flex-col gap-[10px] ">
       <div className="flex flex-row gap-[14px] items-center ">

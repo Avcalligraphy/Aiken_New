@@ -31,9 +31,9 @@ const Psikiater = () => {
               Personalised for your doctor
             </p>
           </div>
-          <NavLink to="/chat-doctor">
+          {/* <NavLink to="/chat-doctor">
             <i className="bx bx-chat text-[20px] mt-[15px] "></i>
-          </NavLink>
+          </NavLink> */}
         </div>
         <div className="flex flex-col gap-[20px]">
           {/* <NavLink to="/psikiater-profile">

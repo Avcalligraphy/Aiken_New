@@ -158,7 +158,7 @@ const Home = () => {
               </NavLink>
               <NavLink to="/psikiater">
                 <BoxFeature
-                  title="My Psikiater"
+                  title="My Psikolog"
                   icon="iconDoctor"
                   color="bg-[#443CC1]"
                 />
@@ -174,12 +174,17 @@ const Home = () => {
             <div className="flex flex-col w-full gap-[20px] mt-[20px] ">
               {monthFilteredData && monthFilteredData.length > 0 ? (
                 monthFilteredData.map((item, index) => (
-                  <BoxEmotion
-                    key={index}
-                    date={item.attributes.publishedAt}
-                    title={item.attributes.title}
-                    dataMood={item.attributes.branchFeeling}
-                  />
+                  <NavLink
+                    key={item.id}
+                    to="/mood-assesment"
+                    state={{ data: item }}
+                  >
+                    <BoxEmotion
+                      date={item.attributes.publishedAt}
+                      title={item.attributes.title}
+                      dataMood={item.attributes.branchFeeling}
+                    />
+                  </NavLink>
                 ))
               ) : (
                 <p>No entries found for the specified .</p>

@@ -68,7 +68,7 @@ const PaymentForm = ({ doctor, user }) => {
     <form className="grid grid-cols-1 mt-4 gap-[14px]" onSubmit={handleSubmit}>
       <Input
         title="Rekening Tujuan"
-        placeholder="9888876510 Mandiri a.n Aiken Project"
+        placeholder="1370021756875 Mandiri a.n Yustika Edho"
         disabled
       />
       <Input

@@ -15,7 +15,7 @@ const PaymentRules = ({doctor}) => {
         <div className="mb-4">
           <Input
             title="1. Pilih rekening tujuan"
-            placeholder="9888876510 Mandiri a.n Aiken Project"
+            placeholder="1370021756875 Mandiri a.n Yustika Edho"
           />
           <p className="text-gray-600 mt-2">
             Disini contohnya si pengguna akan melakukan pembayaran dengan

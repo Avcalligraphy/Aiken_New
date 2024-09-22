@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "../../Layouts";
 import InputMood from "../../components/molecules/InputMood";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -18,24 +18,58 @@ SwiperCore.use([Navigation, Pagination]);
 
 const MoodAssesment = () => {
   const location = useLocation();
-  const { data } = location.state || {};
-  console.log(data);
-  const [selectedMood, setSelectedMood] = useState("angry");
-  const [activeBranches, setActiveBranches] = useState({});
-  const [range, setRange] = useState("50");
-  const [loading, setLoading] = useState(false); // default value for the range input
-  const [note, setNote] = useState("");
-  const [formAnswers, setFormAnswers] = useState({});
+  const { data } = location.state || {}; // Data from state for editing
+
+  const [selectedMood, setSelectedMood] = useState(
+    data?.attributes?.title || "angry"
+  );
+  const [activeBranches, setActiveBranches] = useState(
+    data?.attributes?.branchFeeling
+      ? JSON.parse(data.attributes.branchFeeling)
+      : {}
+  );
+  const [range, setRange] = useState(data?.attributes?.range || "50");
+  const [note, setNote] = useState(data?.attributes?.note || "");
+  const [formAnswers, setFormAnswers] = useState(
+    data?.attributes?.question ? JSON.parse(data.attributes.question) : {}
+  );
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedAudio, setRecordedAudio] = useState(null); // To store recorded audio blob
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(""); // To play back the recorded audio
+  const [recordedAudio, setRecordedAudio] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(
+    `https://admin.aikenhealth.id${data?.attributes?.voice?.data[0]?.attributes?.url}` ||
+      ""
+  ); // Set initial audio from existing data
   const [photo, setPhoto] = useState(null);
+   const [photoPreview, setPhotoPreview] = useState(null); // To store the photo preview URL
+
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const { dataQuestion } = useStoreQuestion();
   const navigate = useNavigate();
-  useFetchDataQuestion();
   const auth = useAuthUser();
   const authHeader = useAuthHeader();
+  const chunks = useRef([]);
+  const mediaRecorderRef = useRef(null); // Replaced with useRef
+  useFetchDataQuestion();
+
+  useEffect(() => {
+    // Load existing photo if available
+    if (data?.attributes?.photo?.data?.attributes?.url) {
+      setPhotoPreview(
+        `https://admin.aikenhealth.id${data.attributes.photo.data.attributes.url}`
+      );
+    }
+    
+  }, [data]);
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhoto(file); // Save the new photo file
+      setPhotoPreview(URL.createObjectURL(file)); // Set new photo preview
+    }
+  };
 
   const handleSlideChange = (swiper) => {
     const activeMood = MoodList[swiper.activeIndex].name;
@@ -55,29 +89,25 @@ const MoodAssesment = () => {
       [key]: value,
     }));
   };
-  const chunks = useRef([]);
 
   const startRecording = async () => {
     try {
-      // Meminta izin untuk menggunakan mikrofon
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // Inisialisasi MediaRecorder
-      const recorder = new MediaRecorder(stream);
-      setMediaRecorder(recorder);
-      recorder.start();
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder; // Store in ref
+      mediaRecorder.start();
       setIsRecording(true);
 
-      recorder.ondataavailable = (e) => {
-        chunks.current.push(e.data); // Simpan data yang direkam dalam bentuk chunks
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.current.push(e.data);
       };
 
-      recorder.onstop = () => {
-        const blob = new Blob(chunks.current, { type: "audio/wav" }); // Konversi chunks ke Blob
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks.current, { type: "audio/wav" });
         setRecordedAudio(blob);
         const audioURL = window.URL.createObjectURL(blob);
-        setAudioUrl(audioURL); // Untuk playback
-        chunks.current = []; // Reset chunks setelah selesai
+        setAudioUrl(audioURL);
+        chunks.current = [];
       };
     } catch (err) {
       console.error("Error accessing microphone:", err);
@@ -85,18 +115,30 @@ const MoodAssesment = () => {
   };
 
   const stopRecording = () => {
-    mediaRecorder.stop(); // Hentikan perekaman
-    setIsRecording(false);
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop(); // Stop the media recorder
+      setIsRecording(false);
+    }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!photo) {
+      setErrorMessage("Photo is required.");
+      return;
+    }
+
+    if (!recordedAudio) {
+      setErrorMessage("Audio recording is required.");
+      return;
+    }
+
+    // Jika validasi lolos, reset pesan error
+    setErrorMessage("");
     setLoading(true);
 
     try {
       const formData = new FormData();
-
-      // Menambahkan file suara dan foto ke dalam FormData
       if (recordedAudio) {
         formData.append("files", recordedAudio, "recorded-audio.wav");
       }
@@ -104,48 +146,59 @@ const MoodAssesment = () => {
         formData.append("files", photo);
       }
 
-      // Melakukan upload file ke API Strapi
       const uploadResponse = await axios.post(
         "https://admin.aikenhealth.id/api/upload",
         formData,
         {
           headers: {
-            Authorization: authHeader(), // Pastikan format Bearer
+            Authorization: authHeader(),
             "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      const fileIds = uploadResponse.data.map((file) => file.id); // Mendapatkan ID file yang diupload
+      const fileIds = uploadResponse.data.map((file) => file.id);
 
-      // Data untuk mood yang akan dikirim
       const moodData = {
         data: {
           title: selectedMood,
           branchFeeling: JSON.stringify(activeBranches),
           range: range,
-          users_permissions_user: auth()?.id, // User ID dari auth kit
+          users_permissions_user: auth()?.id,
           note: note,
           question: JSON.stringify(formAnswers),
-          voice: fileIds.length > 0 ? fileIds[0] : null, // Menggunakan file pertama untuk suara
-          photo: fileIds.length > 1 ? fileIds[1] : null, // Menggunakan file kedua untuk foto
+          voice: fileIds.length > 0 ? fileIds[0] : null,
+          photo: fileIds.length > 1 ? fileIds[1] : null,
         },
       };
 
-      // Mengirim data mood ke API
-      const response = await axios.post(
-        "https://admin.aikenhealth.id/api/moods",
-        moodData,
-        {
-          headers: {
-            Authorization: authHeader(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      let response;
+      if (data?.id) {
+        response = await axios.put(
+          `https://admin.aikenhealth.id/api/moods/${data.id}`,
+          moodData,
+          {
+            headers: {
+              Authorization: authHeader(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          "https://admin.aikenhealth.id/api/moods",
+          moodData,
+          {
+            headers: {
+              Authorization: authHeader(),
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
 
       if (response.status === 200) {
-        navigate("/"); // Pindah halaman setelah sukses
+        navigate("/");
       } else {
         console.error("Error submitting data:", response.statusText);
       }
@@ -159,10 +212,10 @@ const MoodAssesment = () => {
   const selectedMoodObject = MoodList.find(
     (item) => item.name === selectedMood
   );
-
   const questionMood = dataQuestion.filter(
     (item) => item.attributes.mood === selectedMood
   );
+
   return (
     <Layout>
       <div
@@ -181,20 +234,20 @@ const MoodAssesment = () => {
                 <img
                   src={`/icons/${item.name}.png`}
                   alt={item.name}
-                  className="w-[180px] h-auto "
+                  className="w-[180px] h-auto"
                 />
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
 
-        <div className="flex justify-center mt-[10px] ">
+        <div className="flex justify-center mt-[10px]">
           <h1 className="text-[32px] font-bold leading-[28px] text-center max-w-[259px]">
             What do you feel today {selectedMood || "None"}?
           </h1>
         </div>
 
-        <div className="grid grid-cols-2 gap-[20px] mt-[22px] px-[15px]  ">
+        <div className="grid grid-cols-2 gap-[20px] mt-[22px] px-[15px]">
           {selectedMoodObject &&
             selectedMoodObject.branch.map((branch) => (
               <InputMood
@@ -206,7 +259,7 @@ const MoodAssesment = () => {
             ))}
         </div>
 
-        <div className="mt-[40px] px-[15px] pb-[200px] ">
+        <div className="mt-[40px] px-[15px] pb-[200px]">
           <img alt="text-mood" src="/ornaments/textMoodIcon.png" />
           <h1 className="mt-[-22px] font-bold text-[20px]">Assess yourself</h1>
           <p className="font-medium text-[#949494] text-[14px]">
@@ -232,12 +285,10 @@ const MoodAssesment = () => {
               </div>
             </div>
 
+            {/* Show previous answers */}
             {[
               `Apa yang membuatmu merasa ${selectedMood} saat ini?`,
               `Belakangan ini, seberapa sering kamu merasakan ${selectedMood}?`,
-              `Apa yang biasanya kamu lakukan ketika merasa sangat ${selectedMood}?`,
-              `Apa yang kamu pikirkan saat merasakan emosi ini ${selectedMood}?`,
-              `Apakah ada tindakan tertentu yang membuatmu merasa ${selectedMood}?`,
             ].map((question, index) => (
               <FormAsses
                 key={index}
@@ -259,9 +310,7 @@ const MoodAssesment = () => {
                 value={formAnswers[item.attributes.question] || ""}
               />
             ))}
-          </div>
 
-          <div className="flex flex-col gap-[26px] mt-[24px] ">
             <Input
               title="Catatan Singkat"
               icon="notepad"
@@ -269,18 +318,27 @@ const MoodAssesment = () => {
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
+
             <Input
               title="Photo"
               icon="camera"
               type="file"
-              onChange={(e) => setPhoto(e.target.files[0])}
+              onChange={handlePhotoChange}
             />
-            <div className="flex flex-col gap-[10px] ">
-              <div className="flex flex-row gap-[14px] items-center ">
+            {photoPreview && (
+              <img
+                src={photoPreview}
+                alt="Photo Preview"
+              />
+            )}
+
+            {/* Display previous audio and allow re-recording */}
+            <div className="flex flex-col gap-[10px]">
+              <div className="flex flex-row gap-[14px] items-center">
                 <i
                   className={`bx bxs-microphone text-[20px] text-[#240F41]`}
                 ></i>
-                <h1 className=" text-[#240F41] font-bold text-[16px] ">
+                <h1 className=" text-[#240F41] font-bold text-[16px]">
                   Rekam Suara
                 </h1>
               </div>
@@ -289,13 +347,13 @@ const MoodAssesment = () => {
                   {!isRecording && (
                     <i
                       onClick={startRecording}
-                      className="bx bxs-microphone text-[20px] text-black "
+                      className="bx bxs-microphone text-[20px] text-black"
                     ></i>
                   )}
                   {isRecording && (
                     <i
                       onClick={stopRecording}
-                      className="bx bxs-microphone-off text-[20px] text-red-500 "
+                      className="bx bxs-microphone-off text-[20px] text-red-500"
                     ></i>
                   )}
 
@@ -307,13 +365,12 @@ const MoodAssesment = () => {
                         Browser Anda tidak mendukung elemen audio.
                       </audio>
                       {/* Delete Button */}
-
                       <i
                         onClick={() => {
                           setAudioUrl("");
                           setRecordedAudio(null);
                         }}
-                        className="bx bxs-trash text-[20px] text-red-500 "
+                        className="bx bxs-trash text-[20px] text-red-500"
                       ></i>
                     </div>
                   )}
@@ -322,11 +379,14 @@ const MoodAssesment = () => {
             </div>
 
             <Button
-              title={loading ? "Loading ..." : "Save Data"}
+              title={
+                loading ? "Loading ..." : data?.id ? "Update Data" : "Save Data"
+              }
               width="w-[171px]"
               onClick={handleSubmit}
               disabled={loading}
             />
+            <p>{errorMessage}</p>
           </div>
         </div>
       </div>
