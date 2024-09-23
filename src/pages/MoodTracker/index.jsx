@@ -1,10 +1,15 @@
-import React from 'react'
-import BoxTracker from '../../components/MoodTrackerComponent/BoxTracker'
-import Layout from '../../Layouts'
-import BoxActivitie from '../../components/MoodTrackerComponent/BoxActivitie';
-import ScatterChart from '../../components/Chart';
-import { useFetchDataActivityMoods, useFetchDataMood, useStoreActivityMoods, useStoreMood } from '../../lib/store';
-import { useAuthUser } from 'react-auth-kit';
+import React from "react";
+import BoxTracker from "../../components/MoodTrackerComponent/BoxTracker";
+import Layout from "../../Layouts";
+import BoxActivitie from "../../components/MoodTrackerComponent/BoxActivitie";
+import ScatterChart from "../../components/Chart";
+import {
+  useFetchDataActivityMoods,
+  useFetchDataMood,
+  useStoreActivityMoods,
+  useStoreMood,
+} from "../../lib/store";
+import { useAuthUser } from "react-auth-kit";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import SwiperCore from "swiper";
@@ -14,7 +19,7 @@ SwiperCore.use([Navigation, Pagination]);
 const MoodTracker = () => {
   const { dataMood } = useStoreMood();
   const { dataActivityMoods } = useStoreActivityMoods();
-  useFetchDataActivityMoods()
+  useFetchDataActivityMoods();
   const auth = useAuthUser();
   useFetchDataMood();
   const filteredData = dataMood.filter(
@@ -36,37 +41,39 @@ const MoodTracker = () => {
       publishedDate.toLocaleDateString() === today.toLocaleDateString()
     );
   });
+
   const allMood =
     dataActivityMoods &&
     dataActivityMoods
       .filter(
-        (item) => item.attributes.mood === filteredDataMood[0].attributes.title
+        (item) =>
+          filteredDataMood.length > 0 &&
+          item.attributes.mood === filteredDataMood[0].attributes.title
       )
       .map((item) => ({
         title: item.attributes.title,
         image: item.attributes.image.data.attributes.url,
       }));
 
-
   return (
     <Layout>
       <div
         style={{
           backgroundImage: "url(/ornaments/ornaments.png)",
-          // backgroundSize: "cover",
         }}
         className="min-h-screen px-[15px] pb-[200px]  "
       >
-        {/* <img src="/images/moodTracker.png" /> */}
         <div className="mb-[30px]">
           <h1 className="font-semibold text-[18px]">Mood Tracker</h1>
           <ScatterChart filteredData={filteredData} />
         </div>
         <img alt="text-mood" src="/ornaments/textMoodIcon.png" className="" />
-        <h1 className=" mt-[-22px] font-bold text-[18px] ">
+        <h1 className="mt-[-22px] font-bold text-[18px]">
           Activities designed for you{" "}
           <span className="text-purple-600">
-            {filteredDataMood && filteredDataMood[0].attributes.title}
+            {filteredDataMood && filteredDataMood.length > 0
+              ? filteredDataMood[0].attributes.title
+              : "No mood recorded"}
           </span>
         </h1>
         <p className="font-medium text-[#949494] text-[13px] ">
@@ -74,20 +81,23 @@ const MoodTracker = () => {
         </p>
         <div className="flex mt-5 ">
           <Swiper spaceBetween={100} slidesPerView={2} pagination={false}>
-            {allMood ? allMood.map((item, index) => (
+            {allMood && allMood.length > 0 ? (
+              allMood.map((item, index) => (
                 <SwiperSlide key={index}>
                   <BoxActivitie
                     title={item.title}
                     image={`https://admin.aikenhealth.id${item.image}`}
                   />
                 </SwiperSlide>
-              )) : <p className='text-black font-semibold'>Data not found</p>}
+              ))
+            ) : (
+              <p className="text-black font-semibold">Data not found</p>
+            )}
           </Swiper>
-          {/* <BoxActivitie /> */}
         </div>
       </div>
     </Layout>
   );
-}
+};
 
-export default MoodTracker
+export default MoodTracker;
