@@ -5,6 +5,8 @@ import { useAuthHeader } from "react-auth-kit";
 
 // API URLs
 const apiURL = "https://admin.aikenhealth.id/api/dear-diaries?populate=*";
+const consultantURL =
+  "https://admin.aikenhealth.id/api/consultings?populate=*";
 const doctorURL = "https://admin.aikenhealth.id/api/physicotheraphies?populate=*";
 const readingURL = "https://admin.aikenhealth.id/api/reading-corners?populate=*";
 const questionURL = "https://admin.aikenhealth.id/api/form-questions?populate=*";
@@ -46,6 +48,40 @@ const useFetchData = () => {
     fetchData();
   }, [authHeader, setData, data]);
 };
+
+// store data for pasien consultant
+const useStoreConsultant = create((set) => ({
+  data: [],
+  setData: (newData) => set({ data: newData }),
+}));
+
+// Custom hook to fetch dear diaries data
+const useFetchDataConsultant = () => {
+  const authHeader = useAuthHeader();
+  const setData = useStoreConsultant((state) => state.setData);
+  const data = useStoreConsultant((state) => state.data);
+
+  useEffect(() => {
+    const fetchDataConsultant = async () => {
+      if (data.length === 0) {
+        try {
+          const res = await axios.get(consultantURL, {
+            headers: {
+              Authorization: authHeader(),
+            },
+          });
+          setData(res.data.data);
+        } catch (error) {
+          console.error("Error fetching dear diaries data:", error);
+        }
+      }
+    };
+
+    fetchDataConsultant();
+  }, [authHeader, setData, data]);
+};
+
+
 
 // Store for doctor data
 const useStoreDoctor = create((set) => ({
@@ -293,5 +329,7 @@ export {
   useStoreActivityMoods,
   useFetchDataActivityMoods,
   useStoreUsers,
-  useFetchDataUsers
+  useFetchDataUsers,
+  useStoreConsultant,
+  useFetchDataConsultant
 };

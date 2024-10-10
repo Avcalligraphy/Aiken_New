@@ -130,6 +130,7 @@ const Home = () => {
               filteredUsers.map((item, index) => (
                 <BoxPasien
                   key={index}
+                  idPasien={item.id}
                   gender={item.gender}
                   name={item.username}
                   email={item.email}
@@ -174,17 +175,17 @@ const Home = () => {
             <div className="flex flex-col w-full gap-[20px] mt-[20px] ">
               {monthFilteredData && monthFilteredData.length > 0 ? (
                 monthFilteredData.map((item, index) => (
-                  <NavLink
+                  <div
                     key={item.id}
-                    to="/mood-assesment"
-                    state={{ data: item }}
                   >
                     <BoxEmotion
+                      id={item.id}
+                      data={item}
                       date={item.attributes.publishedAt}
                       title={item.attributes.title}
                       dataMood={item.attributes.branchFeeling}
                     />
-                  </NavLink>
+                  </div>
                 ))
               ) : (
                 <p>No entries found for the specified .</p>

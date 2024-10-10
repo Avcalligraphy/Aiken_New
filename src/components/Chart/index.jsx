@@ -8,8 +8,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { useFetchDataMood, useStoreMood } from "../../lib/store";
-import { useAuthHeader, useAuthUser } from "react-auth-kit";
 
 Chart.register(CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
@@ -31,10 +29,11 @@ const moodIcons = {
   surprise: "/icons/surpriseIcon.png",
 };
 
-const ScatterChart = ({filteredData}) => {
+const ScatterChart = ({ filteredData }) => {
   const [selectedMonth, setSelectedMonth] = useState(
     localStorage.getItem("selectedMonth")
   ); // Ambil bulan yang dipilih
+  const [selectedWeek, setSelectedWeek] = useState(1); // Pekan yang dipilih, default pekan 1
   const [imageMap, setImageMap] = useState({});
 
   useEffect(() => {
@@ -53,13 +52,20 @@ const ScatterChart = ({filteredData}) => {
     return () => clearInterval(interval);
   }, [selectedMonth]);
 
-
   // Filter data berdasarkan bulan yang dipilih
   const monthFilteredData = filteredData.filter((item) => {
     const itemMonth = new Date(item.attributes.publishedAt)
       .toISOString()
       .slice(0, 7); // Ambil tahun-bulan
     return itemMonth === selectedMonth; // Cocokkan dengan bulan yang dipilih
+  });
+
+  // Filter data berdasarkan pekan yang dipilih
+  const weekFilteredData = monthFilteredData.filter((item) => {
+    const day = new Date(item.attributes.publishedAt).getDate();
+    const startDay = (selectedWeek - 1) * 7 + 1;
+    const endDay = startDay + 6;
+    return day >= startDay && day <= endDay;
   });
 
   useEffect(() => {
@@ -73,8 +79,8 @@ const ScatterChart = ({filteredData}) => {
     });
   }, []);
 
-  // Map data yang sesuai bulan yang dipilih
-  const moodData = monthFilteredData.map((item) => {
+  // Map data yang sesuai pekan yang dipilih
+  const moodData = weekFilteredData.map((item) => {
     const date = new Date(item.attributes.publishedAt).toLocaleDateString(
       "en-US",
       { weekday: "long" }
@@ -177,11 +183,26 @@ const ScatterChart = ({filteredData}) => {
   };
 
   return (
-    <div style={{ height: "250px", width: "100%" }}>
+    <div style={{ height: "300px", width: "100%" }}>
+      <div>
+        <label htmlFor="week-select">Select Week: </label>
+        <select
+          id="week-select"
+          value={selectedWeek}
+          onChange={(e) => setSelectedWeek(Number(e.target.value))}
+        >
+          <option value={1}>Week 1 (1-7)</option>
+          <option value={2}>Week 2 (8-14)</option>
+          <option value={3}>Week 3 (15-21)</option>
+          <option value={4}>Week 4 (22-28)</option>
+          <option value={5}>Week 5 (29-31)</option>
+        </select>
+      </div>
+
       {/* Tampilkan pesan "not found" jika tidak ada data */}
       {moodData.length === 0 ? (
         <div className="text-black mt-8 font-semibold text-center">
-          Data not found for {selectedMonth}
+          Data not found for {selectedMonth}, Week {selectedWeek}
         </div>
       ) : (
         <Scatter data={data} options={options} />

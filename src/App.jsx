@@ -26,6 +26,8 @@ import PaymentCardPage from './pages/PaymentPage/PaymentCard'
 import RulesPage from './pages/PaymentPage/Rules'
 import PasienDiary from './pages/DearDiary/PasienDiary'
 import MoodPasien from './components/Doctor/MoodPasien'
+import ConsultantPasien from './pages/ConsultantPasien'
+import AddDiaryPasien from './pages/AddDiaryPasien'
 // import PaymentRulesPage from './pages/PaymentPage/PaymentRules'
 
 function App() {
@@ -141,6 +143,22 @@ function App() {
                 element={
                   <RequireAuth loginPath="/landing">
                     <MoodPasien />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/consultant"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <ConsultantPasien />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/add-diary-pasien"
+                element={
+                  <RequireAuth loginPath="/landing">
+                    <AddDiaryPasien />
                   </RequireAuth>
                 }
               />

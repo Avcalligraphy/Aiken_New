@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const BoxPasien = ({ name,  gender, keyId, email }) => {
+const BoxPasien = ({ name,  gender, keyId, email, idPasien }) => {
   return (
     <div
       key={keyId}
@@ -42,6 +42,9 @@ const BoxPasien = ({ name,  gender, keyId, email }) => {
 
           <NavLink to="/mood-pasien" state={{ dataUser: name }}>
             <i className="bx bxs-bar-chart-alt-2 text-purple-700 "></i>
+          </NavLink>
+          <NavLink to="/consultant" state={{ dataUser: idPasien, namePasien:name }}>
+            <i className="bx bx-chat text-[20px] "></i>
           </NavLink>
         </div>
       </div>

@@ -34,6 +34,9 @@ export default function Navbar() {
       case "/psikiater":
         setActiveIndex(2);
         break;
+      case "/chat-doctor":
+        setActiveIndex(2);
+        break;
       case "/psikiater-profile":
         setActiveIndex(2);
         break;

@@ -22,6 +22,9 @@ export default function NavbarDoctor() {
       case "/pasien-diary":
         setActiveIndex(2);
         break;
+      case "/consultant":
+        setActiveIndex(2);
+        break;
       case "/mood-pasien":
         setActiveIndex(2);
         break;
