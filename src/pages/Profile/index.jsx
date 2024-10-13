@@ -219,7 +219,7 @@ const Profile = () => {
                   {t("language")}
                 </h1>
                 <select
-                  className="font-medium text-[12px] "
+                  className="font-medium text-[12px] bg-white "
                   onChange={changeLanguage}
                   value={i18n.language}
                 >
