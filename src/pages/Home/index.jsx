@@ -12,14 +12,18 @@ import { useFetchDataMood, useFetchDataReading, useStoreMood, useStoreReading } 
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
 import BoxPasien from '../../components/Doctor/BoxPasien';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 SwiperCore.use([Navigation, Pagination]);
 
 const Home = () => {
   const [userData, setUserData] = useState(null); // User data state
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [translatedTitle, setTranslatedTitle] = useState(null);
+  const language = localStorage.getItem("language") || "en"
   const [selectedMonth, setSelectedMonth] = useState(
     localStorage.getItem("selectedMonth")
   );
+   const { t } = useTranslation();
   const { dataReading } = useStoreReading();
   useFetchDataReading();
   const { dataMood } = useStoreMood();
@@ -31,6 +35,46 @@ const Home = () => {
       item.attributes.users_permissions_user.data.attributes.username ===
       auth()?.username
   );
+  const translateText = async (text) => {
+    const response = await fetch(
+      "https://deep-translate1.p.rapidapi.com/language/translate/v2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-rapidapi-host": "deep-translate1.p.rapidapi.com",
+          "x-rapidapi-key":
+            "8275405090msh11c4edaf317ebc4p15fe72jsn2c42e223b715",
+        },
+        body: JSON.stringify({
+          q: text,
+          source: "id", // Asumsikan teks asli dalam bahasa Indonesia
+          target: language, // Terjemahkan ke bahasa dari localStorage
+        }),
+      }
+    );
+    const result = await response.json();
+    return result?.data?.translations?.translatedText;
+  };
+  useEffect(() => {
+    const fetchTranslations = async () => {
+       const translated = await Promise.all(
+         dataReading.map(async (item) => {
+           const translatedTitle = await translateText(item.attributes.title);
+           return {
+             ...item,
+             attributes: {
+               ...item.attributes,
+               title: translatedTitle, // Menyimpan terjemahan di sini
+             },
+           };
+         })
+       );
+       setTranslatedTitle(translated);
+    };
+
+    fetchTranslations();
+  }, [dataReading, language]);
   useEffect(() => {
     // Fungsi untuk memperbarui bulan jika ada perubahan di localStorage
     const checkMonthChange = () => {
@@ -137,7 +181,7 @@ const Home = () => {
                 />
               ))
             ) : (
-              <p>No entries found for the specified .</p>
+              <p>{t("entri")}</p>
             )}
           </div>
         ) : (
@@ -145,28 +189,28 @@ const Home = () => {
             <div className="grid grid-cols-4 mt-[20px] ">
               <NavLink to="/mood-assesment">
                 <BoxFeature
-                  title="Mood Asses"
+                  title={t("moodAsses")}
                   icon="moodFeature"
                   color="bg-[#88D24E]"
                 />
               </NavLink>
               <NavLink to="/dear-diary">
                 <BoxFeature
-                  title="Dear Diary"
+                  title={t("dearDiary")}
                   icon="iconDiary"
                   color="bg-[#9D4760]"
                 />
               </NavLink>
               <NavLink to="/psikiater">
                 <BoxFeature
-                  title="My Psikolog"
+                  title={t("counseling")}
                   icon="iconDoctor"
                   color="bg-[#443CC1]"
                 />
               </NavLink>
               <NavLink to="/chat-ai">
                 <BoxFeature
-                  title="AI Chat"
+                  title={t("aiChat")}
                   icon="iconAI"
                   color="bg-[#7A54B7]"
                 />
@@ -175,9 +219,7 @@ const Home = () => {
             <div className="flex flex-col w-full gap-[20px] mt-[20px] ">
               {monthFilteredData && monthFilteredData.length > 0 ? (
                 monthFilteredData.map((item, index) => (
-                  <div
-                    key={item.id}
-                  >
+                  <div key={item.id}>
                     <BoxEmotion
                       id={item.id}
                       data={item}
@@ -188,17 +230,17 @@ const Home = () => {
                   </div>
                 ))
               ) : (
-                <p>No entries found for the specified .</p>
+                <p>{t("moodAsses")}</p>
               )}
             </div>
             <div className="flex flex-col gap-[15px] mt-[15px] mb-[200px] ">
               <h1 className="text-black   font-bold text-[20px]  ">
-                Reading Corner
+                {t("readingCorner")}
               </h1>
               <div className="flex">
                 <Swiper spaceBetween={180} slidesPerView={3} pagination={false}>
-                  {dataReading && dataReading.length > 0 ? (
-                    dataReading.map((item, index) => (
+                  {translatedTitle && translatedTitle.length > 0 ? (
+                    translatedTitle.map((item, index) => (
                       <SwiperSlide>
                         <NavLink
                           key={item.id}
@@ -217,7 +259,7 @@ const Home = () => {
                       </SwiperSlide>
                     ))
                   ) : (
-                    <p>No entries found for the specified username.</p>
+                    <p> {t('entri')} </p>
                   )}
                 </Swiper>
               </div>

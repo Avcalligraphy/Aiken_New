@@ -4,6 +4,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthHeader, useAuthUser } from "react-auth-kit";
 import axios from "axios";
 import NavbarDoctor from "./NavbarDoctor";
+import { useTranslation } from "react-i18next";
 
 const Layout = ({ children, title }) => {
   const authHeader = useAuthHeader();
@@ -12,6 +13,7 @@ const Layout = ({ children, title }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const auth = useAuthUser();
+  const { t } = useTranslation();
 
   // Fungsi untuk mendapatkan bulan saat ini
   const getCurrentMonth = () => {
@@ -92,10 +94,12 @@ const Layout = ({ children, title }) => {
           <NavLink to="/profile">
             {/* Tampilkan loading jika data sedang diambil */}
             {isLoading ? (
-              <h1 className="text-white font-bold text-[16px]">Loading...</h1>
+              <h1 className="text-white font-bold text-[16px]">
+                {t("loading")}
+              </h1>
             ) : (
               <h1 className="text-white font-bold text-[16px]">
-                {userData?.premiumAccount ? "Premium" : "Free Trial"}
+                {userData?.premiumAccount ? `${t("premium")}` : `${t("trial")}`}
               </h1>
             )}
           </NavLink>

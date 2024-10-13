@@ -2,12 +2,14 @@ import React, { useState } from 'react'
 import Button from '../../components/molecules/Button';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSignIn } from 'react-auth-kit';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const signIn = useSignIn();
   const navigate = useNavigate();
+   const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -62,7 +64,7 @@ const Login = () => {
             </h1>
           </div>
           <div className="flex flex-col pl-[35px] mt-[48px] w-full  ">
-            <h1 className="font-medium text-[16px] ">Email Address</h1>
+            <h1 className="font-medium text-[16px] ">{t("emailLabel")}</h1>
             <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center px-[17px] py-[16px] gap-[16px] mt-[17px] ">
               <i className="bx bxs-envelope text-[20px] text-[#7A54B7] "></i>
               <input
@@ -70,13 +72,13 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black  "
-                placeholder="Your Email Address"
+                placeholder={t("emailPlaceholder")}
                 required
               />
             </div>
           </div>
           <div className="flex flex-col pl-[35px] mt-[20px] w-full mb-[30px] ">
-            <h1 className="font-medium text-[16px] ">Password</h1>
+            <h1 className="font-medium text-[16px] ">{t("password")}</h1>
             <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center justify-center px-[17px] py-[16px] gap-[16px] mt-[17px] ">
               <i className="bx bxs-lock-alt text-[#7A54B7] text-[20px] "></i>
               <input
@@ -84,7 +86,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black  "
-                placeholder="Your Password"
+                placeholder={t("passwordPlacholder")}
                 required
               />
             </div>
@@ -94,11 +96,12 @@ const Login = () => {
               type="submit"
               className={`py-[11px] w-[171px] rounded-[18px] bg-gradient-to-r from-[#DEA841]  to-[#A34D39] shadow-md shadow-[#DEA841] text-white font-semibold text-[16px] `}
             >
-              Sign In
+              {t("buttonLogin")}
             </button>
             <NavLink to="/register">
               <h1 className=" text-[16px] font-bold mt-[26px] ">
-                Don’t Have Aiken Account ?{" "}
+                {t("descLogin")}
+                {""}
                 <span className=" text-[#7A54B7] ">Sign Up</span>
               </h1>
             </NavLink>

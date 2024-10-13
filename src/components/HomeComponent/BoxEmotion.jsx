@@ -1,10 +1,12 @@
 import axios from 'axios';
 import React from 'react'
 import { useAuthHeader } from 'react-auth-kit';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const BoxEmotion = ({title, dataMood, date, id, data}) => {
+  const {t} = useTranslation()
   const jsonObject = JSON.parse(dataMood);
   const authHeader = useAuthHeader();
   const mappedData = Object.entries(jsonObject).map(([key, value]) => ({
@@ -120,8 +122,8 @@ const BoxEmotion = ({title, dataMood, date, id, data}) => {
                     : "text-[#34B5B7]"
                 }`}
               >
-                {title}
-                <span className=" ml-2 font-medium text-[10px] text-black ">
+                {t(`moodList.${title}.name`)}
+                <span className=" ml-2 mr-2 font-medium text-[10px] text-black ">
                   {formattedHour(date)}:00
                 </span>
               </h1>
@@ -144,7 +146,10 @@ const BoxEmotion = ({title, dataMood, date, id, data}) => {
                         : "bg-[#34B5B7]"
                     }`}
                   />
-                  <p className="text-[14px] ">{item.emotion}</p>
+                  <p className="text-[14px] ">
+                    {" "}
+                    {t(`emotionsMood.${item.emotion}`)}{" "}
+                  </p>
                 </div>
               ))}
             </div>

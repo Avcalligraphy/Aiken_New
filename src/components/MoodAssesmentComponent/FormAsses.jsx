@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 const FormAsses = ({ active = true, title, onInputChange, value }) => {
+  const {t} = useTranslation()
   return (
     <div
       className={`${
@@ -13,7 +16,7 @@ const FormAsses = ({ active = true, title, onInputChange, value }) => {
           <input
             onChange={(e) => onInputChange(e.target.value)} // Pass the input value to onInputChange
             className="w-full bg-[#EEF6FC] text-[14px] placeholder-[#676767] text-black font-medium  "
-            placeholder="Your Asses"
+            placeholder={t("assesPlaceholder")}
             value={value}
           />
         </div>

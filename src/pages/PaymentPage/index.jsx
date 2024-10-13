@@ -6,12 +6,14 @@ import PaymentForm from '../../components/PaymentComponents/PaymentForm';
 import PaymentRules from '../../components/PaymentComponents/PaymentRules';
 import { useLocation } from 'react-router-dom';
 import { useAuthUser } from 'react-auth-kit';
+import { useTranslation } from 'react-i18next';
 
 const PaymentPage = () => {
   const location = useLocation();
   const { doctor } = location.state || {}; // Ambil data doctor dari state
   const [page, setPage] = useState(0);
   const auth = useAuthUser()
+  const { t } = useTranslation();
   return (
     <Layout>
       <div
@@ -23,7 +25,7 @@ const PaymentPage = () => {
       >
         <img alt="text-mood" src="/ornaments/textMoodIcon.png" />
         <h1 className=" mt-[-22px] font-bold text-[20px] ">
-          Requirement Payment
+          {t("requirement_payment")}
         </h1>
         {/* {page === 0 ? (
           <PaymentRules onClick={() => setPage(page + 1)} />

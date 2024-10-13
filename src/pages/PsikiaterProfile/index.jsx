@@ -1,26 +1,109 @@
-import React from 'react'
-import Layout from '../../Layouts';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import Layout from "../../Layouts";
+import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const PsikiaterProfile = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const { doctor } = location.state || {}; // Ambil data doctor dari state
-  console.log(doctor);
+  const [translatedDoctor, setTranslatedDoctor] = useState(null); // State untuk menyimpan hasil terjemahan
+  const language = localStorage.getItem("language") || "ar"; // Ambil bahasa dari localStorage, default ke 'ar'
+
+  // Fungsi untuk mentranslate teks
+  const translateText = async (text) => {
+    const response = await fetch(
+      "https://deep-translate1.p.rapidapi.com/language/translate/v2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-rapidapi-host": "deep-translate1.p.rapidapi.com",
+          "x-rapidapi-key":
+            "8275405090msh11c4edaf317ebc4p15fe72jsn2c42e223b715",
+        },
+        body: JSON.stringify({
+          q: text,
+          source: "id", // Asumsikan teks asli dalam bahasa Indonesia
+          target: language, // Terjemahkan ke bahasa dari localStorage
+        }),
+      }
+    );
+    const result = await response.json();
+    return result?.data?.translations?.translatedText;
+  };
+
+  // Fungsi untuk menerjemahkan data doctor
+  useEffect(() => {
+    const translateDoctorData = async () => {
+      if (doctor?.attributes) {
+        // Terjemahkan nama, gelar, pengalaman, dan durasi
+        const translatedName = await translateText(doctor.attributes.name);
+        const translatedDegree = await translateText(doctor.attributes.degree);
+        const translatedExperience = await translateText(
+          `${doctor.attributes.experience} Tahun`
+        );
+        const translatedDuration = await translateText(
+          `${doctor.attributes.duration} Menit`
+        );
+
+        // Terjemahkan bidang keahlian
+        const translatedFields = await Promise.all(
+          doctor.attributes.field.map(async (item) => {
+            const translatedField = await translateText(item.field);
+            return {
+              ...item,
+              field: translatedField, // Ganti dengan terjemahan
+            };
+          })
+        );
+
+        // Terjemahkan riwayat pendidikan
+        const translatedEducation = await Promise.all(
+          doctor.attributes.educational.map(async (item) => {
+            const translatedDegree = await translateText(item.degree);
+            const translatedInstitution = await translateText(item.institution);
+            return {
+              ...item,
+              degree: translatedDegree,
+              institution: translatedInstitution,
+            };
+          })
+        );
+
+        // Simpan data yang sudah diterjemahkan
+        setTranslatedDoctor({
+          ...doctor,
+          attributes: {
+            ...doctor.attributes,
+            name: translatedName,
+            degree: translatedDegree,
+            experience: translatedExperience,
+            duration: translatedDuration,
+            field: translatedFields,
+            educational: translatedEducation,
+          },
+        });
+      }
+    };
+
+    translateDoctorData();
+  }, [doctor, language]);
+
   return (
     <Layout>
       <div
         className="min-h-screen px-[15px] pt-[15px] pb-[200px] "
         style={{
           backgroundImage: "url(/ornaments/ornaments.png)",
-          // backgroundSize: "cover",
         }}
       >
         <img alt="text-mood" src="/ornaments/textMoodIcon.png" />
-        <h1 className=" mt-[-22px] font-bold text-[20px] ">
-          {doctor?.attributes?.name}
+        <h1 className="mt-[-22px] font-bold text-[20px] ">
+          {doctor?.attributes?.name || `${t('loading')}`}
         </h1>
         <p className="font-medium text-[#949494] text-[13px] ">
-          {doctor?.attributes?.degree}
+          {translatedDoctor?.attributes?.degree || `${t('loading')}`}
         </p>
         <div className="flex justify-center">
           <img
@@ -39,25 +122,22 @@ const PsikiaterProfile = () => {
             </h1>
             <div className="flex flex-row justify-between mt-[10px] ">
               <div>
-                <h1 className=" font-semibold text-lg  ">
-                  Pengalaman Bekerja:
-                </h1>
+                <h1 className="font-semibold text-lg">{t("experience")}</h1>
                 <p className="font-semibold text-[#333333] ">
-                  {doctor?.attributes?.experience} Tahun
+                  {translatedDoctor?.attributes?.experience || `${t('loading')}`}
                 </p>
               </div>
               <div>
-                <h1 className=" font-semibold text-lg  ">Durasi Konsultasi:</h1>
+                <h1 className="font-semibold text-lg">{t("duration")} :</h1>
                 <p className="font-semibold text-[#333333] ">
-                  {doctor?.attributes?.duration} Menit
+                  {translatedDoctor?.attributes?.duration || `${t('loading')}`}
                 </p>
               </div>
             </div>
             <div className="mb-4 mt-4">
-              <h2 className="text-lg font-semibold">Bidang Keahlian :</h2>
+              <h2 className="text-lg font-semibold">{t("field")} :</h2>
               <div className="flex flex-wrap gap-2 mt-2">
-  
-                {doctor?.attributes?.field.map((item, index) => {
+                {translatedDoctor?.attributes?.field.map((item, index) => {
                   const bgColors = [
                     "bg-blue-200",
                     "bg-gray-200",
@@ -80,7 +160,7 @@ const PsikiaterProfile = () => {
                       className={`${bgColor} ${textColor} px-3 py-1 rounded-full`}
                       key={index}
                     >
-                      {item.field}
+                      {item.field || `${t('loading')}`}
                     </span>
                   );
                 })}
@@ -88,10 +168,10 @@ const PsikiaterProfile = () => {
             </div>
 
             <div className="mb-4">
-              <h2 className="text-lg font-semibold">Riwayat Pendidikan :</h2>
-              {doctor?.attributes?.educational.map((item) => (
-                <div>
-                  <p>{item.degree}</p>
+              <h2 className="text-lg font-semibold">{t("history")} :</h2>
+              {translatedDoctor?.attributes?.educational.map((item, index) => (
+                <div key={index}>
+                  <p>{item.degree || `${t('loading')}`}</p>
                   <p>
                     {item.institution}, {item.year}
                   </p>
@@ -99,14 +179,12 @@ const PsikiaterProfile = () => {
               ))}
             </div>
 
-            {/* <div className="mb-4">
-              <h2 className="text-lg font-semibold">Nomor STR :</h2>
-              <p>03998764128987123</p>
-            </div> */}
-
-            <NavLink to="/payment-rules" state={{ doctor: doctor }}>
+            <NavLink
+              to="/payment-rules"
+              state={{ doctor: translatedDoctor || doctor }}
+            >
               <button className="w-full bg-[#240F41] text-white py-2 px-4 rounded-lg hover:bg-purple-800 transition duration-300">
-                Make an Appointment
+                {t("make_appointment")}
               </button>
             </NavLink>
           </div>
@@ -114,6 +192,6 @@ const PsikiaterProfile = () => {
       </div>
     </Layout>
   );
-}
+};
 
-export default PsikiaterProfile
+export default PsikiaterProfile;

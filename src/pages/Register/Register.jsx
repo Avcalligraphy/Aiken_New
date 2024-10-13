@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSignIn } from "react-auth-kit";
 import Term from "../../components/molecules/Term";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -84,7 +86,7 @@ const Register = () => {
 
               {/* Email Input */}
               <div className="flex flex-col pl-[35px] mt-[48px] w-full  ">
-                <h1 className="font-medium text-[16px] ">Email Address</h1>
+                <h1 className="font-medium text-[16px] ">{t("emailLabel")}</h1>
                 <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center px-[17px] py-[16px] gap-[16px] mt-[17px] ">
                   <i className="bx bxs-envelope text-[20px] text-[#7A54B7] "></i>
                   <input
@@ -92,7 +94,7 @@ const Register = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black"
-                    placeholder="Your Email Address"
+                    placeholder={t("emailPlaceholder")}
                     required
                   />
                 </div>
@@ -100,7 +102,9 @@ const Register = () => {
 
               {/* Username Input */}
               <div className="flex flex-col pl-[35px] mt-[20px] w-full  ">
-                <h1 className="font-medium text-[16px] ">Username</h1>
+                <h1 className="font-medium text-[16px] ">
+                  {t("usernameLabel")}
+                </h1>
                 <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center px-[17px] py-[16px] gap-[16px] mt-[17px] ">
                   <i className="bx bxs-user text-[20px] text-[#7A54B7] "></i>
                   <input
@@ -108,7 +112,7 @@ const Register = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black"
-                    placeholder="Your Username"
+                    placeholder={t("usernamePlaceholder")}
                     required
                   />
                 </div>
@@ -116,7 +120,7 @@ const Register = () => {
 
               {/* Gender Input */}
               <div className="flex flex-col pl-[35px] mt-[20px] w-full">
-                <h1 className="font-medium text-[16px]">Gender</h1>
+                <h1 className="font-medium text-[16px]">{t("gender")}</h1>
                 <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center px-[17px] py-[16px] gap-[16px] mt-[17px]">
                   <i className="bx bx-male-female text-[#7A54B7] text-[20px]"></i>
                   <select
@@ -125,7 +129,7 @@ const Register = () => {
                     className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black"
                     required
                   >
-                    <option value="">Select Gender</option>
+                    <option value="">{t("gender")}</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="others">Others</option>
@@ -135,7 +139,9 @@ const Register = () => {
 
               {/* Phone Input */}
               <div className="flex flex-col pl-[35px] mt-[20px] w-full">
-                <h1 className="font-medium text-[16px]">Handphone Number</h1>
+                <h1 className="font-medium text-[16px]">
+                  {t("handphoneLabel")}
+                </h1>
                 <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center justify-center px-[17px] py-[16px] gap-[16px] mt-[17px]">
                   <i className="bx bxs-phone-call text-[#7A54B7] text-[20px]"></i>
                   <input
@@ -155,7 +161,7 @@ const Register = () => {
 
               {/* Password Input */}
               <div className="flex flex-col pl-[35px] mt-[20px] w-full mb-[30px] ">
-                <h1 className="font-medium text-[16px] ">Password</h1>
+                <h1 className="font-medium text-[16px] ">{t("password")}</h1>
                 <div className="bg-[#E1E1E1] rounded-[23px] w-full flex items-center justify-center px-[17px] py-[16px] gap-[16px] mt-[17px] ">
                   <i className="bx bxs-lock-alt text-[#7A54B7] text-[20px] "></i>
                   <input
@@ -163,7 +169,7 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-[#E1E1E1] text-[16px] placeholder-[#676767] text-black"
-                    placeholder="Your Password"
+                    placeholder={t("passwordPlacholder")}
                     required
                   />
                 </div>
@@ -174,11 +180,11 @@ const Register = () => {
                   type="submit"
                   className={`py-[11px] w-[171px] rounded-[18px] bg-gradient-to-r from-[#DEA841]  to-[#A34D39] shadow-md shadow-[#DEA841] text-white font-semibold text-[16px] `}
                 >
-                  Sign Up
+                  {t("buttonRegister")}
                 </button>
                 <NavLink to="/login">
                   <h1 className=" text-[16px] font-bold mt-[26px] ">
-                    Do You Have Aiken Account ?{" "}
+                    {t("descRegister")}{" "}
                     <span className=" text-[#7A54B7] ">Sign In</span>
                   </h1>
                 </NavLink>

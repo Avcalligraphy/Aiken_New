@@ -28,9 +28,12 @@ import PasienDiary from './pages/DearDiary/PasienDiary'
 import MoodPasien from './components/Doctor/MoodPasien'
 import ConsultantPasien from './pages/ConsultantPasien'
 import AddDiaryPasien from './pages/AddDiaryPasien'
+import "./i18n";
+import { useTranslation } from 'react-i18next'
 // import PaymentRulesPage from './pages/PaymentPage/PaymentRules'
 
 function App() {
+  const { t } = useTranslation();
   return (
     <AuthProvider
       authType={"localstorage"}

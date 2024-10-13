@@ -3,6 +3,7 @@ import Layout from "../../Layouts";
 import { useAuthHeader, useSignOut } from "react-auth-kit";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
@@ -10,6 +11,14 @@ const Profile = () => {
   const signOut = useSignOut();
   const navigate = useNavigate();
   const authHeader = useAuthHeader();
+  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+
+  const changeLanguage = (e) => {
+    const selectedLanguage = e.target.value;
+    i18n.changeLanguage(selectedLanguage); // Ubah bahasa di i18next
+    localStorage.setItem("language", selectedLanguage); // Simpan bahasa ke localStorage
+  };
 
   // Fetch user data from API
   const fetchUserData = async () => {
@@ -114,8 +123,9 @@ const Profile = () => {
   }, [diffDays, userData, authHeader, signOut, navigate]);
 
   if (!userData) {
-    return <div>Loading...</div>;
+    return <div>{t("loading")}</div>;
   }
+  
 
   return (
     <Layout>
@@ -152,7 +162,7 @@ const Profile = () => {
               <i className="bx bx-user-circle text-[24px] text-[#7A54B7]"></i>
               <div>
                 <h1 className="text-[#240F41] font-semibold text-[16px] mb-[2px]">
-                  Name
+                  {t("nameProfile")}
                 </h1>
                 <p className="font-medium text-[12px]">{userData.username}</p>
               </div>
@@ -167,7 +177,7 @@ const Profile = () => {
               <i className="bx bxs-phone text-[24px] text-[#7A54B7]"></i>
               <div>
                 <h1 className="text-[#240F41] font-semibold text-[16px] mb-[2px]">
-                  Contact Number
+                  {t("contactNumber")}
                 </h1>
                 <p className="font-medium text-[12px] ">+{userData.phone}</p>
               </div>
@@ -182,7 +192,9 @@ const Profile = () => {
               <i className="bx bxs-user-check text-[24px] text-[#7A54B7]"></i>
               <div>
                 <h1 className="text-[#240F41] font-semibold text-[16px] mb-[2px]">
-                  {userData.premiumAccount === true ? 'Premium Account' : 'Free Trial'}
+                  {userData.premiumAccount === true
+                    ? `${t("premium")}`
+                    : `${t("trial")}`}
                 </h1>
                 <p className="font-medium text-[12px]">
                   {day}, {date} {month} {year} - {hours}:{minutes}:{seconds}
@@ -198,15 +210,29 @@ const Profile = () => {
           </div>
           <div className="w-full shadow-md shadow-[#7A54B7] bg-gradient-to-r from-[#240F41] to-[#7A54B7] h-[2px]" />
         </div>
-         <div className="flex flex-col w-full mt-[18px]">
+        <div className="flex flex-col w-full mt-[18px]">
           <div className="flex justify-between items-center mb-[15px]">
             <div className="flex flex-row items-center gap-[16px]">
               <i className="bx bxs-user-voice text-[24px] text-[#7A54B7]"></i>
               <div>
                 <h1 className="text-[#240F41] font-semibold text-[16px] mb-[2px]">
-                  Language
+                  {t("language")}
                 </h1>
-                <p className="font-medium text-[12px] ">English Language</p>
+                <select
+                  className="font-medium text-[12px] "
+                  onChange={changeLanguage}
+                  value={i18n.language}
+                >
+                  <option className="font-medium text-[12px] " value="en">
+                    English
+                  </option>
+                  <option className="font-medium text-[12px] " value="id">
+                    Bahasa Indonesia
+                  </option>
+                  <option className="font-medium text-[12px] " value="ar">
+                    العربية
+                  </option>
+                </select>
               </div>
             </div>
             <i className="bx bx-chevron-right text-[20px] text-[#7A54B7]"></i>

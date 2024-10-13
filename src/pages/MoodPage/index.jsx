@@ -14,10 +14,12 @@ import { useAuthHeader, useAuthUser } from "react-auth-kit";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 SwiperCore.use([Navigation, Pagination]);
 
 const MoodAssesment = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const { data } = location.state || {}; // Data from state for editing
 
@@ -41,8 +43,7 @@ const MoodAssesment = () => {
       ""
   ); // Set initial audio from existing data
   const [photo, setPhoto] = useState(null);
-   const [photoPreview, setPhotoPreview] = useState(null); // To store the photo preview URL
-
+  const [photoPreview, setPhotoPreview] = useState(null); // To store the photo preview URL
 
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,8 @@ const MoodAssesment = () => {
   const chunks = useRef([]);
   const mediaRecorderRef = useRef(null); // Replaced with useRef
   useFetchDataQuestion();
+  const [translatedData, setTranslatedData] = useState([]);
+  const language = localStorage.getItem("language") || "en";
 
   useEffect(() => {
     // Load existing photo if available
@@ -67,7 +70,6 @@ const MoodAssesment = () => {
         `https://admin.aikenhealth.id${data?.attributes?.voice?.data[0]?.attributes?.url}`
       );
     }
-    
   }, [data]);
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -128,7 +130,7 @@ const MoodAssesment = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!photo) {
       toast.error("Photo is required.");
       return;
@@ -220,6 +222,48 @@ const MoodAssesment = () => {
     (item) => item.attributes.mood === selectedMood
   );
 
+  // Fungsi untuk menerjemahkan teks
+  const translateText = async (text) => {
+    const response = await fetch(
+      "https://deep-translate1.p.rapidapi.com/language/translate/v2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-rapidapi-host": "deep-translate1.p.rapidapi.com",
+          "x-rapidapi-key":
+            "8275405090msh11c4edaf317ebc4p15fe72jsn2c42e223b715",
+        },
+        body: JSON.stringify({
+          q: text,
+          source: "id", // Asumsikan teks asli dalam bahasa Indonesia
+          target: language, // Terjemahkan ke bahasa dari localStorage
+        }),
+      }
+    );
+    const result = await response.json();
+    return result?.data?.translations?.translatedText;
+  };
+
+  useEffect(() => {
+    const fetchTranslations = async () => {
+      const translated = await Promise.all(
+        questionMood.map(async (item) => {
+          const translatedTitle = await translateText(item.attributes.question);
+          return {
+            ...item,
+            question: translatedTitle, // Simpan hasil terjemahan langsung di title
+          };
+        })
+      );
+      setTranslatedData(translated);
+    };
+
+    if (questionMood.length > 0 && questionMood.length > 0) {
+      fetchTranslations();
+    }
+  }, [questionMood]); // Tambahkan allMood sebagai dependensi
+
   return (
     <Layout>
       <Toaster position="top-center" reverseOrder={false} />
@@ -248,7 +292,7 @@ const MoodAssesment = () => {
 
         <div className="flex justify-center mt-[10px]">
           <h1 className="text-[32px] font-bold leading-[28px] text-center max-w-[259px]">
-            What do you feel today {selectedMood || "None"}?
+            {t("question.what_makes_you_feel")} {t(`emotions.${selectedMood}`)}?
           </h1>
         </div>
 
@@ -257,7 +301,11 @@ const MoodAssesment = () => {
             selectedMoodObject.branch.map((branch) => (
               <InputMood
                 key={branch}
-                title={branch}
+                title={t(
+                  `moodList.${
+                    selectedMoodObject.name
+                  }.branches.${selectedMoodObject.branch.indexOf(branch)}`
+                )}
                 active={!!activeBranches[branch]}
                 onClick={() => toggleBranchActive(branch)}
               />
@@ -266,14 +314,15 @@ const MoodAssesment = () => {
 
         <div className="mt-[40px] px-[15px] pb-[200px]">
           <img alt="text-mood" src="/ornaments/textMoodIcon.png" />
-          <h1 className="mt-[-22px] font-bold text-[20px]">Assess yourself</h1>
+          <h1 className="mt-[-22px] font-bold text-[20px]">{t("moodAsses")}</h1>
           <p className="font-medium text-[#949494] text-[14px]">
-            Personalized for yourself
+            {t("desclabelMoodRecorder")}
           </p>
+
           <div className="mt-[18px] gap-[30px] flex flex-col">
             <div className="bg-[#DCEDF9] border-[#9BADBA] rounded-[30px] border-[1px] w-full p-[20px]">
               <h1 className="font-semibold text-[20px] leading-[20px] mb-[10px]">
-                Seberapa besar persentase perasaan tersebut?
+                {t("question.how_often_feel")} {t(`emotions.${selectedMood}`)}
               </h1>
               <input
                 id="rangeInput"
@@ -290,10 +339,13 @@ const MoodAssesment = () => {
               </div>
             </div>
 
-            {/* Show previous answers */}
             {[
-              `Apa yang membuatmu merasa ${selectedMood} saat ini?`,
-              `Belakangan ini, seberapa sering kamu merasakan ${selectedMood}?`,
+              `${t("question.what_makes_you_feel")}  ${t(
+                `emotions.${selectedMood}`
+              )}  `,
+              `${t("question.how_often_feel")}  ${t(
+                `emotions.${selectedMood}`
+              )}  `,
             ].map((question, index) => (
               <FormAsses
                 key={index}
@@ -304,47 +356,47 @@ const MoodAssesment = () => {
               />
             ))}
 
-            {questionMood?.map((item, index) => (
-              <FormAsses
-                key={item.id}
-                title={item.attributes.question}
-                active={index % 2 === 0}
-                onInputChange={(value) =>
-                  handleInputChange(item.attributes.question, value)
-                }
-                value={formAnswers[item.attributes.question] || ""}
-              />
-            ))}
+            {translatedData?.map((item, index) =>
+              item?.question ? (
+                <FormAsses
+                  key={item.id || index}
+                  title={item.question}
+                  active={index % 2 === 0}
+                  onInputChange={(value) =>
+                    handleInputChange(item.question, value)
+                  }
+                  value={formAnswers[item.question] || ""}
+                />
+              ) : null
+            )}
 
             <Input
-              title="Catatan Singkat"
+              title={t("short_note")}
               icon="notepad"
-              placeholder="Tambahkan Catatan..."
+              placeholder={t("add_note_placeholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
 
             <Input
-              title="Photo"
+              title={t("photo")}
               icon="camera"
               type="file"
               onChange={handlePhotoChange}
             />
             {photoPreview && <img src={photoPreview} alt="Photo Preview" />}
 
-            {/* Display previous audio and allow re-recording */}
             <div className="flex flex-col gap-[10px]">
               <div className="flex flex-row gap-[14px] items-center">
                 <i
                   className={`bx bxs-microphone text-[20px] text-[#240F41]`}
                 ></i>
                 <h1 className=" text-[#240F41] font-bold text-[16px]">
-                  Rekam Suara
+                  {t("record_audio")}
                 </h1>
               </div>
               <div className="bg-gradient-to-b from-[#240F41] to-[#7A54B7] p-[1px] rounded-[24px] w-full h-fit shadow-md shadow-[#7A54B7]">
                 <div className="h-fit bg-white rounded-[24px] px-[23px] py-[14px] flex flex-col items-end ">
-                  {/* Tampilkan tombol untuk merekam atau menghentikan rekaman */}
                   {!isRecording && (
                     <i
                       onClick={startRecording}
@@ -358,11 +410,10 @@ const MoodAssesment = () => {
                     ></i>
                   )}
 
-                  {/* Tampilkan rekaman lama jika tersedia */}
                   {audioUrl && !isRecording && (
                     <div className="w-full flex flex-col items-end gap-[10px]">
                       <h2 className="text-[14px] text-black font-semibold">
-                        Rekaman Lama:
+                        {t("old_recording")}
                       </h2>
                       <audio controls>
                         <source src={audioUrl} type="audio/wav" />
@@ -371,11 +422,10 @@ const MoodAssesment = () => {
                     </div>
                   )}
 
-                  {/* Tampilkan rekaman baru jika sudah ada */}
                   {recordedAudio && !isRecording && (
                     <div className="w-full flex flex-col items-end gap-[10px]">
                       <h2 className="text-[14px] text-black font-semibold">
-                        Rekaman Baru:
+                        {t("new_recording")}
                       </h2>
                       <audio controls>
                         <source
@@ -384,7 +434,6 @@ const MoodAssesment = () => {
                         />
                         Browser Anda tidak mendukung elemen audio.
                       </audio>
-                      {/* Delete Button */}
                       <i
                         onClick={() => {
                           setAudioUrl("");
@@ -400,7 +449,11 @@ const MoodAssesment = () => {
 
             <Button
               title={
-                loading ? "Loading ..." : data?.id ? "Update Data" : "Save Data"
+                loading
+                  ? t("loading")
+                  : data?.id
+                  ? t("update_data")
+                  : t("save_data")
               }
               width="w-[171px]"
               onClick={handleSubmit}

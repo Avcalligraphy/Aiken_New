@@ -4,10 +4,12 @@ import PsikiaterCard from '../../components/molecules/PsikiaterCard';
 import { NavLink } from 'react-router-dom';
 import PsikiaterProfile from '../PsikiaterProfile';
 import { useFetchDataDoctor, useStoreDoctor } from '../../lib/store';
+import { useTranslation } from 'react-i18next';
 
 const Psikiater = () => {
   const { dataDoctor } = useStoreDoctor();
   useFetchDataDoctor(); // Call the custom hook to fetch data
+  const { t } = useTranslation();
   return (
     <Layout>
       <div
@@ -25,10 +27,10 @@ const Psikiater = () => {
               className="mt-[35px]"
             />
             <h1 className=" mt-[-22px] font-bold text-[18px] ">
-              Pyschoteraphist
+              {t("physcotheraphist")}
             </h1>
             <p className="font-medium text-[#949494] text-[13px] ">
-              Personalised for your doctor
+              {t("physcotheraphistDesc")}
             </p>
           </div>
           <NavLink to="/chat-doctor">
@@ -50,7 +52,7 @@ const Psikiater = () => {
                   keyId={item.id}
                   name={item.attributes.name}
                   stars={item.attributes.star}
-                  degree={item.attributes.degree}
+                  degree={t('clinis')}
                   photo={
                     `https://admin.aikenhealth.id` +
                     item.attributes.photo.data.attributes.url

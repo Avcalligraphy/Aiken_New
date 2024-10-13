@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { navigationLinks } from "./NavbarList";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSignOut } from "react-auth-kit";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [redirect, setRedirect] = useState(false);
   const signOut = useSignOut();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const handleSignOut = () => {
     signOut(); // Menghapus token dan user dari local storage
@@ -82,7 +84,7 @@ export default function Navbar() {
                       <span className="icon">
                         <ion-icon name="scan-outline"></ion-icon>
                       </span>
-                      <span className="text">AR Scan</span>
+                      <span className="text">{t("AR")}</span>
                       <span className="circle"></span>
                     </a>
                   </li>
@@ -93,7 +95,7 @@ export default function Navbar() {
                       <span className="icon">
                         <ion-icon name="bar-chart-outline"></ion-icon>
                       </span>
-                      <span className="text">Mood</span>
+                      <span className="text">{t("mood")}</span>
                       <span className="circle"></span>
                     </a>
                   </li>
@@ -104,7 +106,7 @@ export default function Navbar() {
                       <span className="icon">
                         <ion-icon name="home-outline"></ion-icon>
                       </span>
-                      <span className="text">Home</span>
+                      <span className="text">{t("home")}</span>
                       <span className="circle"></span>
                     </a>
                   </li>
@@ -115,7 +117,7 @@ export default function Navbar() {
                       <span className="icon">
                         <ion-icon name="person-outline"></ion-icon>
                       </span>
-                      <span className="text">Profile</span>
+                      <span className="text">{t("profile")}</span>
                       <span className="circle"></span>
                     </a>
                   </li>

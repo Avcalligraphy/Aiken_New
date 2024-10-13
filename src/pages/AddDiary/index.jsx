@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuthHeader, useAuthUser } from "react-auth-kit";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const AddDiary = () => {
   const location = useLocation();
@@ -13,6 +14,7 @@ const AddDiary = () => {
   const authHeader = useAuthHeader();
   const auth = useAuthUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Mengisi state jika ada data untuk di-update
   useEffect(() => {
@@ -89,14 +91,18 @@ const AddDiary = () => {
           onClick={handlePost}
           disabled={posting}
         >
-          {posting ? "Posting..." : data && data.keyId ? "Update" : "Posting"}
+          {posting
+            ? `${t("posting")}...`
+            : data && data.keyId
+            ? `${t("update")}`
+            : `${t("posting")}`}
         </button>
       </div>
 
       <input
         type="text"
         className="w-full mt-4 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-        placeholder="Judul diary"
+        placeholder={t("diaryNote")}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
@@ -104,7 +110,7 @@ const AddDiary = () => {
       <textarea
         className="w-full mt-4 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
         rows="3"
-        placeholder="Apa yang sedang anda rasakan hari ini..."
+        placeholder={t("descNote")}
         value={diary}
         onChange={(e) => setDiary(e.target.value)}
       ></textarea>

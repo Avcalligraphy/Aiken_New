@@ -1,8 +1,10 @@
 import React from 'react'
 import Button from '../../components/molecules/Button';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const LandingPage = () => {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -25,12 +27,11 @@ const LandingPage = () => {
             <h1 className="text-[#BCA8CF] font-bold text-[24px] ">AIKEN.id</h1>
           </div>
           <h1 className=" text-[#BCA8CF] text-[16px] font-medium mt-[20px] mb-[30px] ">
-            Media terapi interaktif untuk <br /> meningkatkan kesehatan mental
-            remaja
+            {t("landing")}
           </h1>
 
           <NavLink to="/login">
-            <Button title="Go Now ..." />
+            <Button title={t("buttonLanding")} />
           </NavLink>
         </div>
       </div>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../../Layouts";
+import { useTranslation } from "react-i18next";
 
 const ChatAI = ({ active = true }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [typingContent, setTypingContent] = useState(""); // Track typing text
-
+  const { t } = useTranslation();
   console.log(typingContent)
 
   const handleSendMessage = async () => {
@@ -135,7 +136,7 @@ const ChatAI = ({ active = true }) => {
               <input
                 type="text"
                 className="flex-1 ml-4 p-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-purple-500"
-                placeholder="Ask me anything..."
+                placeholder={t("aiPlacholder")}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
