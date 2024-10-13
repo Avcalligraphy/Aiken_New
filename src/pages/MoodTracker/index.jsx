@@ -119,7 +119,7 @@ const MoodTracker = () => {
           {t("labelMoodRecorder")}{" "}
           <span className="text-purple-600">
             {filteredDataMood && filteredDataMood.length > 0
-              ? filteredDataMood[0].attributes.title
+              ? t(`moodList.${filteredDataMood[0].attributes.title}.name`)
               : `${t("entri")}`}
           </span>
         </h1>
