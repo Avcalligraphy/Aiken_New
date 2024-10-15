@@ -212,5 +212,9 @@
     "Confused": "Bingung",
     "Startled": "Kaget"
   },
-  "clinis":"Psikologi Klinis"
+  "clinis": "Psikologi Klinis",
+  "complaint": "Pengaduan",
+  "appointment": "Konseling",
+  "chooseDay": "Pilih Hari",
+  "all":"Semua"
 }

@@ -214,5 +214,9 @@
     "Confused": "Confused",
     "Startled": "Startled"
   },
-  "clinis": "Clinical Psychology"
+  "clinis": "Clinical Psychology",
+  "complaint": "Complaint",
+  "appointment": "Counseling",
+  "chooseDay": "Select Day",
+  "all":"All"
 }

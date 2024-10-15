@@ -1,11 +1,19 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next';
 
-const PsikiaterCard = ({name, degree, stars, keyId, photo}) => {
+const PsikiaterCard = ({name, degree, stars, keyId, photo, hour}) => {
+  const {t} = useTranslation()
   return (
-    <div key={keyId} className="max-w-sm rounded-[13px] shadow-md p-4 border border-purple-200 relative">
+    <div
+      key={keyId}
+      className="max-w-sm rounded-[13px] shadow-md p-4 border border-purple-200 relative"
+    >
       {/* Foto kosong */}
       <div className="flex">
-        <img className="w-[50px] h-[50px]  rounded-full flex items-center justify-center" src={photo} />
+        <img
+          className="w-[50px] h-[50px]  rounded-full flex items-center justify-center"
+          src={photo}
+        />
 
         {/* Nama, profesi, dan rating */}
         <div className="ml-4">
@@ -41,18 +49,18 @@ const PsikiaterCard = ({name, degree, stars, keyId, photo}) => {
       </button> */}
 
       {/* Prosentase kecocokan */}
-      {/* <div className="mt-[7px]">
-        <p className="text-[12px]">The therapist fits:</p>
-        <div className='flex flex-row gap-[11px] '> 
-          <div className="w-full bg-gray-200 rounded-full h-[2px] mt-[7px]">
+      <div className="mt-[7px]">
+        <p className="text-[12px]">{t("appointment")}:</p>
+        <div className="flex flex-row gap-[11px] ">
+          {/* <div className="w-full bg-gray-200 rounded-full h-[2px] mt-[7px]">
             <div
               className="bg-black h-[2px] rounded-full"
               style={{ width: "78%" }}
             ></div>
-          </div>
-          <span className="font-semibold text-[12px]">98%</span>
+          </div> */}
+          <span className="font-semibold text-[12px]">{hour}</span>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

@@ -38,6 +38,18 @@ const ScatterChart = ({ filteredData }) => {
   const [imageMap, setImageMap] = useState({});
   const { t } = useTranslation();
 
+  // Fungsi untuk menghitung pekan saat ini
+  const getCurrentWeek = () => {
+    const today = new Date();
+    const day = today.getDate(); // Dapatkan tanggal hari ini
+    return Math.ceil(day / 7); // Hitung minggu ke berapa (1-5)
+  };
+
+  useEffect(() => {
+    // Setel pekan otomatis ketika komponen pertama kali di-load
+    setSelectedWeek(getCurrentWeek());
+  }, []);
+
   useEffect(() => {
     const checkMonthChange = () => {
       const currentMonth = localStorage.getItem("selectedMonth");
@@ -82,7 +94,7 @@ const ScatterChart = ({ filteredData }) => {
     );
     const mood = item.attributes.title.toLowerCase();
     return {
-      x: t(`days_of_week.${date.toLowerCase()}`), // Terjemahan untuk hari
+      x: t(`days_of_week.${date.toLowerCase()}`),
       y: moodScale[mood],
       mood,
     };
@@ -123,7 +135,7 @@ const ScatterChart = ({ filteredData }) => {
     scales: {
       x: {
         type: "category",
-        labels: daysOfWeek, // Terjemahan untuk hari
+        labels: daysOfWeek,
         title: {
           display: true,
           text: t("day"),
@@ -183,6 +195,7 @@ const ScatterChart = ({ filteredData }) => {
         <select
           id="week-select"
           value={selectedWeek}
+          className="bg-white"
           onChange={(e) => setSelectedWeek(Number(e.target.value))}
         >
           <option value={1}>Week 1 (1-7)</option>

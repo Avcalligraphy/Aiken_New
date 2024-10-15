@@ -239,6 +239,26 @@ const Profile = () => {
           </div>
           <div className="w-full shadow-md shadow-[#7A54B7] bg-gradient-to-r from-[#240F41] to-[#7A54B7] h-[2px]" />
         </div>
+        <a
+          href="https://linktr.ee/aikenbook.id"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col w-full mt-[18px]"
+        >
+          <div className="flex justify-between items-center mb-[15px]">
+            <div className="flex flex-row items-center gap-[16px]">
+              <i className="bx bxs-notepad text-[24px] text-[#7A54B7]"></i>
+              <div>
+                <h1 className="text-[#240F41] font-semibold text-[16px] mb-[2px]">
+                  {t("complaint")}
+                </h1>
+                <p className="font-medium text-[12px] ">+6282322949895</p>
+              </div>
+            </div>
+            <i className="bx bx-chevron-right text-[20px] text-[#7A54B7]"></i>
+          </div>
+          <div className="w-full shadow-md shadow-[#7A54B7] bg-gradient-to-r from-[#240F41] to-[#7A54B7] h-[2px]" />
+        </a>
       </div>
     </Layout>
   );
