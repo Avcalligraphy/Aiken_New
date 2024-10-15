@@ -65,15 +65,16 @@ const Psikiater = () => {
         </div>
 
         {/* Dropdown untuk memilih hari */}
-        <div className="mb-[20px]">
-          <label htmlFor="day-select" className="block font-medium">
+        <h1 className=" text-[18px] font-semibold text-right mr-10 ">{t("chooseDay")}</h1>
+        <div className="mb-[20px] flex justify-end">
+          {/* <label htmlFor="day-select" className=" text-[18px]">
             {t("chooseDay")}
-          </label>
+          </label> */}
           <select
             id="day-select"
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
-            className="bg-white px-4 py-2 mt-2"
+            className="bg-white px-4 py-2 mt-2 text-[18px]"
           >
             {availableDays.map((day) => (
               <option key={day} value={day}>
